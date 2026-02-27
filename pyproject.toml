@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dagpipe"
+version = "0.1.0"
+description = "Zero-cost, crash-proof LLM pipeline orchestrator"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "Herbert" }]
+keywords = ["llm", "pipeline", "orchestrator", "dag", "checkpoints"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "pydantic>=2.0",
+    "pyyaml",
+]
+
+[project.urls]
+Homepage = "https://github.com/devilsfave/dagpipe"
+Repository = "https://github.com/devilsfave/dagpipe"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

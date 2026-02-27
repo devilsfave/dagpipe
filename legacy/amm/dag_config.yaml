@@ -1,0 +1,60 @@
+# AMM Phase 5 — DAG Configuration
+#
+# Explicit task dependency graph. Replaces CrewAI's implicit sequential
+# task chain. The Python orchestrator (dag.py) reads this file, not the LLM.
+#
+# Each node maps to a function in nodes.py.
+# is_deterministic: true means no LLM call — pure Python/CLI execution.
+# complexity: float 0.0-1.0 used by router.py to select the model.
+# output_schema: key in SCHEMA_REGISTRY (schemas.py).
+
+nodes:
+  - id: pm_spec
+    fn: pm_generate_spec
+    output_schema: SpecOutput
+    complexity: 0.4
+    description: "Translate council concept into technical specification"
+
+  - id: scaffold
+    fn: scaffold_project
+    depends_on: [pm_spec]
+    output_schema: ScaffoldOutput
+    complexity: 0.0
+    is_deterministic: true
+    description: "Create project structure via npx create-next-app (no LLM)"
+
+  - id: write_db
+    fn: write_db_schema
+    depends_on: [scaffold]
+    output_schema: CodeOutput
+    complexity: 0.6
+    description: "Implement database schema and data access layer"
+
+  - id: write_auth_ui
+    fn: write_auth_ui
+    depends_on: [write_db]
+    output_schema: CodeOutput
+    complexity: 0.7
+    description: "Build authentication logic and core UI components"
+
+  - id: design_polish
+    fn: design_polish
+    depends_on: [write_auth_ui]
+    output_schema: DesignOutput
+    complexity: 0.3
+    description: "Apply design system — colors, typography, spacing"
+
+  - id: install_deps
+    fn: install_dependencies
+    depends_on: [design_polish, pm_spec]
+    complexity: 0.0
+    is_deterministic: true
+    description: "Install all npm dependencies (automated)"
+
+  - id: deploy
+    fn: deploy_cloudflare
+    depends_on: [install_deps, pm_spec]
+    output_schema: DeployOutput
+    complexity: 0.0
+    is_deterministic: true
+    description: "Deploy to Cloudflare Pages via wrangler CLI (no LLM)"
