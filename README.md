@@ -29,7 +29,7 @@ It turns any multi-step LLM workflow into a resilient, checkpointed DAG that rou
 ## Installation
 
 ```bash
-pip install dagpipe
+pip install dagpipe-core
 ```
 
 **Requirements:** Python 3.12+ · pydantic ≥ 2.0 · pyyaml
