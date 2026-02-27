@@ -22,6 +22,7 @@
 | 3 | `README.md` updated (Quickstart + Core Features) | ✅ |
 | 4 | pytest full suite — **37 passed in 0.46s** (zero regressions) | ✅ |
 | 5 | PROJECT_STATUS.md updated | ✅ |
+| 6 | Code pushed to GitHub (`devilsfave/dagpipe`) | ✅ |
 
 ### Task 4 — Completed (2026-02-27)
 

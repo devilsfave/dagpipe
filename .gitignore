@@ -37,6 +37,7 @@ coverage.xml
 
 # DagPipe
 .dagpipe/checkpoints/
+legacy/
 
 # IDEs
 .vscode/
