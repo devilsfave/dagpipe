@@ -276,6 +276,22 @@ Wire any of these as your `low_complexity_fn`, `high_complexity_fn`, or `fallbac
 
 ---
 
+## FAQ & Architecture Decisions
+
+**Why not just use LangChain or LangGraph?**
+LangGraph is powerful but comes with a massive latency and complexity tax. DagPipe is intentionally stripped down. It’s strictly a DAG executor with disk-based checkpointing and Pydantic validation. The goal was zero bloated abstractions—just pure Python callables solving the "crash and restart" problem for long-running batch jobs.
+
+**How does it route without using an LLM?**
+Using an LLM to route an LLM is too expensive. The router uses pure Python heuristics (keyword matching, token thresholds) to estimate cognitive complexity. If the task scores below your threshold, it routes to your `low_complexity_fn` (like a local 8B model). Above it, it hits your `high_complexity_fn`.
+
+**What happens if the schema validator gets stuck in an infinite loop?**
+The `PipelineOrchestrator` respects the `max_retries` parameter. If a node exhausts its retry budget (e.g., the model keeps failing to return valid JSON despite error feedback), DagPipe halts and raises a `RuntimeError`. Because of the checkpointing, you can adjust the prompt or the schema and restart without losing previous work.
+
+**Does this support parallel/async execution?**
+Currently, `v0.1.0` executes the topological sort sequentially. Full `asyncio` support for concurrent execution of independent nodes is on the roadmap for the next major release. The immediate focus of this version is entirely on crash resilience and state persistence.
+
+---
+
 ## Project Status
 
 ```
