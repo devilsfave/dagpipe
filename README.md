@@ -279,7 +279,7 @@ Wire any of these as your `low_complexity_fn`, `high_complexity_fn`, or `fallbac
 ## FAQ & Architecture Decisions
 
 **Why not just use LangChain or LangGraph?**
-LangGraph is powerful but comes with a massive latency and complexity tax. DagPipe is intentionally stripped down. It’s strictly a DAG executor with disk-based checkpointing and Pydantic validation. The goal was zero bloated abstractions—just pure Python callables solving the "crash and restart" problem for long-running batch jobs.
+LangGraph is powerful but comes with a massive latency and complexity tax. DagPipe is intentionally stripped down. It’s strictly a DAG executor with disk-based checkpointing and Pydantic validation. The goal was zero bloated abstractions,just pure Python callables solving the "crash and restart" problem for long-running batch jobs.
 
 **How does it route without using an LLM?**
 Using an LLM to route an LLM is too expensive. The router uses pure Python heuristics (keyword matching, token thresholds) to estimate cognitive complexity. If the task scores below your threshold, it routes to your `low_complexity_fn` (like a local 8B model). Above it, it hits your `high_complexity_fn`.
