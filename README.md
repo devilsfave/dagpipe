@@ -292,11 +292,23 @@ Currently, `v0.1.0` executes the topological sort sequentially. Full `asyncio` s
 
 ---
 
+## Templates
+
+Ready-to-run pipeline packages built on DagPipe. Download, drop in your API key, and execute.
+
+| Template | Description | Link |
+|---|---|---|
+| **Content Pipeline** | Research → draft → edit → SEO-optimize blog posts using Groq's free tier | [Get it →](https://dagpipe.lemonsqueezy.com/checkout/buy/a60d44e4-14a6-4c9d-beaf-9757ae6921c8) |
+
+More templates coming soon. Have a use case? [Open an issue.](https://github.com/devilsfave/dagpipe/issues)
+
+---
+
 ## Project Status
 
 ```
 Phase 1 — Core Library         ████████████████████  COMPLETE
-Phase 2 — PyPI Publish         ████░░░░░░░░░░░░░░░░  IN PROGRESS  
+Phase 2 — PyPI + Templates     ████████████████░░░░  IN PROGRESS  
 Phase 3 — MCP Servers          ░░░░░░░░░░░░░░░░░░░░  UPCOMING
 Phase 4 — Auto-Migrator        ░░░░░░░░░░░░░░░░░░░░  UPCOMING
 ```
