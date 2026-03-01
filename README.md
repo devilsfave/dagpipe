@@ -19,7 +19,7 @@
 
 ---
 
-### 🚀 Stop paying for failed LLM pipelines.
+###  Stop paying for failed LLM pipelines.
 
 Building with LLMs is too expensive and too fragile. Pipelines break mid-run. Rate limits waste your completed work. Paying for GPT-4 to handle every single node is massive overkill. **DagPipe fixes all three.**
 
@@ -27,7 +27,7 @@ It turns any multi-step LLM workflow into a resilient, checkpointed DAG that rou
 
 ---
 
-## ⚡ Why DagPipe?
+##  Why DagPipe?
 
 <div align="center">
 
@@ -52,7 +52,7 @@ pip install dagpipe-core
 
 ---
 
-## 🚀 Quickstart
+##  Quickstart
 
 ```python
 from pathlib import Path
@@ -136,7 +136,7 @@ result = orchestrator.run(initial_state={"topic": "AI in African fintech"})
 
 ---
 
-## 🧠 How It Works
+##  How It Works
 
 ```
 Your Tasks (YAML or Python list of DAGNodes)
@@ -266,7 +266,7 @@ nodes:
 
 ---
 
-## 💼 Use Cases
+##  Use Cases
 
 - **Content pipelines** — Research → draft → edit → publish with zero loss on failure
 - **Code generation** — Spec → scaffold → implement → test across free models
@@ -276,7 +276,7 @@ nodes:
 
 ---
 
-## 💸 The Zero-Cost Stack
+##  The Zero-Cost Stack
 
 DagPipe is designed to run entirely on free tiers:
 
