@@ -1,12 +1,20 @@
-# DagPipe
+<p align="center">
+  <img src="assets/logo.png" alt="DagPipe Logo" width="150" />
+</p>
 
-> **Zero-cost, crash-proof LLM pipeline orchestrator.**
+<h1 align="center">DagPipe</h1>
 
-![Tests](https://img.shields.io/badge/tests-37%20passing-brightgreen)
-![Python](https://img.shields.io/badge/python-3.12+-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-0.1.0-orange)
-![Dependencies](https://img.shields.io/badge/dependencies-2-lightgrey)
+<p align="center">
+  <b>Zero-cost, crash-proof LLM pipeline orchestrator.</b>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/tests-37%20passing-brightgreen" alt="Tests" />
+  <img src="https://img.shields.io/badge/python-3.12+-blue" alt="Python" />
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
+  <img src="https://img.shields.io/badge/version-0.1.0-orange" alt="Version" />
+  <img src="https://img.shields.io/badge/dependencies-2-lightgrey" alt="Dependencies" />
+</p>
 
 Building with LLMs is too expensive and too fragile. Pipelines break mid-run. Rate limits waste completed work. Paying for GPT-4 on every node is overkill. **DagPipe fixes all three.**
 
