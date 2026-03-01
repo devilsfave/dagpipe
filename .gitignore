@@ -38,6 +38,10 @@ coverage.xml
 # DagPipe
 .dagpipe/checkpoints/
 legacy/
+AGENTS.md
+BLUEPRINT.md
+HANDOFF.md
+PROJECT_STATUS.md
 
 # IDEs
 .vscode/
