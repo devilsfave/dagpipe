@@ -80,26 +80,32 @@ def publish(context, model):
 
 
 # ── 2. Wire your LLM providers ────────────────────────────────
-import groq  # or any OpenAI-compatible client
+# DagPipe handles ANY Python callable. Mix and match providers:
 
-client = groq.Groq()
+from openai import OpenAI
+import groq
 
-def groq_70b(messages):
-    return client.chat.completions.create(
-        model="llama-3.3-70b-versatile", messages=messages
+# Example A: A paid OpenAI model for complex tasks
+openai_client = OpenAI()
+def gpt_4o(messages):
+    return openai_client.chat.completions.create(
+        model="gpt-4o", messages=messages
     ).choices[0].message.content
 
+# Example B: A free Groq (or local Ollama) model for easy tasks
+groq_client = groq.Groq()
 def groq_8b(messages):
-    return client.chat.completions.create(
+    return groq_client.chat.completions.create(
         model="llama3-8b-8192", messages=messages
     ).choices[0].message.content
 
 
 # ── 3. Build the router ───────────────────────────────────────
+# Save money by assigning cheap models to low-complexity tasks
 router = ModelRouter(
-    low_complexity_fn=groq_8b,       label_low="groq_8b",
-    high_complexity_fn=groq_70b,     label_high="groq_70b",
-    fallback_fn=groq_8b,             label_fallback="groq_8b_fallback",
+    low_complexity_fn=groq_8b,       label_low="free_llama3",
+    high_complexity_fn=gpt_4o,       label_high="paid_gpt4o",
+    fallback_fn=groq_8b,             label_fallback="fallback_llama3",
     complexity_threshold=0.6,
 )
 
