@@ -1,50 +1,58 @@
-<p align="center">
-  <img src="assets/logo.png" alt="DagPipe Logo" width="150" />
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:161b22,100:00d9ff&height=120&section=header"/>
+
+<div align="center">
+  
+<img src="assets/logo.png" alt="DagPipe Logo" width="160" />
+
+# DagPipe
+
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=00D9FF&center=true&vCenter=true&multiline=true&repeat=true&width=600&height=80&lines=Zero-cost,+crash-proof+LLM+orchestration;Route+tasks+safely+to+free-tier+models;Never+lose+progress+mid-pipeline)](https://git.io/typing-svg)
+
+<p>
+  <img src="https://img.shields.io/badge/tests-37%20passing-00d9ff?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/license-MIT-0d1117?style=flat-square&color=00d9ff" alt="License" />
+  <img src="https://img.shields.io/badge/version-0.1.0-FF4500?style=flat-square" alt="Version" />
 </p>
 
-<h1 align="center">DagPipe</h1>
-
-<p align="center">
-  <b>Zero-cost, crash-proof LLM pipeline orchestrator.</b>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/tests-37%20passing-brightgreen" alt="Tests" />
-  <img src="https://img.shields.io/badge/python-3.12+-blue" alt="Python" />
-  <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
-  <img src="https://img.shields.io/badge/version-0.1.0-orange" alt="Version" />
-  <img src="https://img.shields.io/badge/dependencies-2-lightgrey" alt="Dependencies" />
-</p>
-
-Building with LLMs is too expensive and too fragile. Pipelines break mid-run. Rate limits waste completed work. Paying for GPT-4 on every node is overkill. **DagPipe fixes all three.**
-
-It turns any multi-step LLM workflow into a resilient, checkpointed DAG that routes tasks to the right free-tier model — and resumes from the last successful step if anything goes wrong.
+</div>
 
 ---
 
-## Why DagPipe
+### 🚀 Stop paying for failed LLM pipelines.
 
-| Problem | DagPipe Solution |
+Building with LLMs is too expensive and too fragile. Pipelines break mid-run. Rate limits waste your completed work. Paying for GPT-4 to handle every single node is massive overkill. **DagPipe fixes all three.**
+
+It turns any multi-step LLM workflow into a resilient, checkpointed DAG that routes tasks to the right free-tier model — and resumes exactly from the last successful step if anything goes wrong.
+
+---
+
+## ⚡ Why DagPipe?
+
+<div align="center">
+
+| 🔴 Without DagPipe | 🟢 With DagPipe |
 |---|---|
-| Pipeline crashes = start over | JSON checkpointing — resume from last successful node |
-| Paying for large models on simple tasks | Complexity-based routing to free-tier LLMs |
-| LLM returns malformed JSON | Pydantic validation + automatic retry with error feedback |
-| Tight coupling to one LLM provider | Provider-agnostic — wire any callable as your model |
-| Fragile sequential chains | Explicit DAG with topological sort and cycle detection |
+| Pipeline crashes = start over | **JSON checkpointing** — resume from last successful node |
+| Paying for large models on simple tasks | **Cognitive routing** — route easy tasks to free-tier LLMs |
+| LLM returns malformed JSON | **Guaranteed structured output** — auto-retry with error feedback |
+| Tight coupling to one LLM provider | **Provider-agnostic** — wire any callable as your model |
+| Fragile sequential scripts | **Topological DAG execution** — safe dependency resolution |
+
+</div>
 
 ---
 
-## Installation
+## ⚙️ Installation
 
 ```bash
 pip install dagpipe-core
 ```
-
-**Requirements:** Python 3.12+ · pydantic ≥ 2.0 · pyyaml
+> **Requirements:** Python 3.12+ · `pydantic >= 2.0` · `pyyaml`
 
 ---
 
-## Quickstart
+## 🚀 Quickstart
 
 ```python
 from pathlib import Path
@@ -128,7 +136,7 @@ result = orchestrator.run(initial_state={"topic": "AI in African fintech"})
 
 ---
 
-## How It Works
+## 🧠 How It Works
 
 ```
 Your Tasks (YAML or Python list of DAGNodes)
@@ -167,7 +175,7 @@ Your Tasks (YAML or Python list of DAGNodes)
 
 ---
 
-## Core Modules
+## 📦 Core Modules
 
 ### `dagpipe.dag` — The Orchestrator
 The central engine. Loads a DAG from a Python list or YAML file, sorts nodes by dependency, and executes them in order with checkpointing and retry.
@@ -232,7 +240,7 @@ result = constrained_generate(
 
 ---
 
-## YAML Pipeline Definition
+## 📝 YAML Pipeline Definition
 
 ```yaml
 # my_pipeline.yaml
@@ -258,7 +266,7 @@ nodes:
 
 ---
 
-## Use Cases
+## 💼 Use Cases
 
 - **Content pipelines** — Research → draft → edit → publish with zero loss on failure
 - **Code generation** — Spec → scaffold → implement → test across free models
@@ -268,7 +276,7 @@ nodes:
 
 ---
 
-## Zero-Cost Stack
+## 💸 The Zero-Cost Stack
 
 DagPipe is designed to run entirely on free tiers:
 
@@ -284,7 +292,7 @@ Wire any of these as your `low_complexity_fn`, `high_complexity_fn`, or `fallbac
 
 ---
 
-## FAQ & Architecture Decisions
+## ❓ FAQ & Architecture Decisions
 
 **Why not just use LangChain or LangGraph?**
 LangGraph is powerful but comes with a massive latency and complexity tax. DagPipe is intentionally stripped down. It’s strictly a DAG executor with disk-based checkpointing and Pydantic validation. The goal was zero bloated abstractions,just pure Python callables solving the "crash and restart" problem for long-running batch jobs.
@@ -300,7 +308,7 @@ Currently, `v0.1.0` executes the topological sort sequentially. Full `asyncio` s
 
 ---
 
-## Templates
+## 🛒 Templates
 
 Ready-to-run pipeline packages built on DagPipe. Download, drop in your API key, and execute.
 
@@ -312,7 +320,7 @@ More templates coming soon. Have a use case? [Open an issue.](https://github.com
 
 ---
 
-## Project Status
+## 📊 Project Status
 
 ```
 Phase 1 — Core Library         ████████████████████  COMPLETE
@@ -325,18 +333,24 @@ Phase 4 — Auto-Migrator        ░░░░░░░░░░░░░░░�
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Issues and PRs welcome. Please read the contribution guidelines before submitting.
 
 ---
 
-## License
+## 📄 License
 
 MIT License — Built for the global developer community.
 
 ---
 
+<div align="center">
+  <img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=algolia" alt="Dev Quote"/>
+</div>
+
 <p align="center">
   Built by <a href="https://github.com/devilsfave">@devilsfave</a> ·
 </p>
+
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:161b22,100:00d9ff&height=120&section=footer"/>
