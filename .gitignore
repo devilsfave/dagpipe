@@ -1,3 +1,8 @@
+# Commercial Assets (Do NOT push to GitHub)
+product_cover.png
+store_logo.png
+*.zip
+
 # Python
 __pycache__/
 *.py[cod]

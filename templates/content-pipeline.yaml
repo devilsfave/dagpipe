@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# DagPipe Template: Content Creation Pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+# A 5-node DAG for automated content creation.
+# Nodes execute in dependency order: research → outline → draft → edit → publish_ready
+#
+# Usage:
+#   from dagpipe.dag import load_dag
+#   nodes = load_dag(Path("templates/content-pipeline.yaml"))
+
+nodes:
+  - id: research
+    fn: research
+    depends_on: []
+    complexity: 0.4
+    is_deterministic: false
+    description: "Gather key facts, statistics, and sources on the given topic."
+
+  - id: outline
+    fn: outline
+    depends_on: [research]
+    complexity: 0.5
+    is_deterministic: false
+    description: "Organize research findings into a structured article outline with sections and key points."
+
+  - id: draft
+    fn: draft
+    depends_on: [outline]
+    complexity: 0.8
+    is_deterministic: false
+    description: "Write a complete first draft of the article based on the outline."
+
+  - id: edit
+    fn: edit
+    depends_on: [draft]
+    complexity: 0.6
+    is_deterministic: false
+    description: "Review the draft for clarity, grammar, tone, and factual accuracy, then produce a polished version."
+
+  - id: publish_ready
+    fn: publish_ready
+    depends_on: [edit]
+    complexity: 0.0
+    is_deterministic: true
+    description: "Package the final edited content with metadata for publication."
