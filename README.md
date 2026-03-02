@@ -320,7 +320,7 @@ Ready-to-run pipeline packages built on DagPipe. Download, drop in your API key,
 
 | Template | Description | Link |
 |---|---|---|
-| **Content Pipeline** | Research → draft → edit → SEO-optimize blog posts using Groq's free tier | [Get it →](https://dagpipe.lemonsqueezy.com/checkout/buy/a60d44e4-14a6-4c9d-beaf-9757ae6921c8) |
+| **Content Pipeline** | Research → draft → edit → SEO-optimize blog posts using Groq's free tier | [Get it →](https://dagpipe.lemonsqueezy.com/checkout/buy/8877121e-5ad7-415f-b3e0-192b583ebfcd) |
 
 More templates coming soon. Have a use case? [Open an issue.](https://github.com/devilsfave/dagpipe/issues)
 
