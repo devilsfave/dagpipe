@@ -293,6 +293,19 @@ def main() -> None:
     print(f"  Status: {final.get('status', 'unknown')}")
     print(f"{'='*60}\n")
 
+    # Save to a text file for the demo
+    output_dir = Path("outputs")
+    output_dir.mkdir(exist_ok=True)
+    output_file = output_dir / "final_article.txt"
+    
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(f"TITLE: {final.get('title', 'N/A')}\n")
+        f.write(f"WORD COUNT: {final.get('word_count', 0)}\n")
+        f.write("-" * 60 + "\n\n")
+        f.write(final.get("content", ""))
+
+    print(f"  Final article saved to: {output_file}")
+
 
 if __name__ == "__main__":
     main()

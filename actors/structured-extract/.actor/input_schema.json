@@ -1,0 +1,52 @@
+{
+    "title": "Structured Data Extractor Input",
+    "description": "Scrapes a URL and extracts structured data validated against a JSON Schema using a Groq-compatible LLM.",
+    "type": "object",
+    "schemaVersion": 1,
+    "required": ["url", "output_schema", "groq_api_key"],
+    "properties": {
+        "url": {
+            "title": "URL to scrape",
+            "type": "string",
+            "description": "The page URL to scrape and extract data from.",
+            "editor": "textfield",
+            "example": "https://example.com/product"
+        },
+        "output_schema": {
+            "title": "Output JSON Schema",
+            "type": "object",
+            "description": "A JSON Schema object describing the structure of the data to extract. The LLM will return data validated against this schema.",
+            "editor": "json",
+            "example": {
+                "type": "object",
+                "properties": {
+                    "title": { "type": "string" },
+                    "price": { "type": "number" },
+                    "description": { "type": "string" }
+                },
+                "required": ["title", "price"]
+            }
+        },
+        "groq_api_key": {
+            "title": "API Key",
+            "type": "string",
+            "description": "Your Groq API key (or API key for any OpenAI-compatible provider). Get a free Groq key at console.groq.com.",
+            "editor": "textfield",
+            "isSecret": true
+        },
+        "model": {
+            "title": "Model name",
+            "type": "string",
+            "description": "Model to use for extraction. Defaults to llama-3.3-70b-versatile (Groq free tier).",
+            "editor": "textfield",
+            "default": "llama-3.3-70b-versatile"
+        },
+        "base_url": {
+            "title": "API Base URL",
+            "type": "string",
+            "description": "Base URL of the OpenAI-compatible API. Defaults to Groq. Use https://api.openai.com/v1 for OpenAI, https://api.together.xyz/v1 for Together AI, or http://localhost:11434/v1 for Ollama.",
+            "editor": "textfield",
+            "default": "https://api.groq.com/openai/v1"
+        }
+    }
+}

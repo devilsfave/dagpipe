@@ -1,0 +1,20 @@
+{
+	"actorSpecification": 1,
+	"name": "structured-extract",
+	"title": "Structured Data Extractor",
+	"description": "Scrapes any URL and returns structured JSON data validated against your custom schema. Powered by Groq (free tier) with retry logic and AJV validation.",
+	"version": "0.1",
+	"buildTag": "latest",
+	"meta": {
+		"templateId": "ts-mcp-proxy",
+		"generatedBy": "dagpipe"
+	},
+	"input": "./input_schema.json",
+	"dockerfile": "../Dockerfile",
+	"storages": {
+		"dataset": {
+			"actorSpecification": 1,
+			"views": {}
+		}
+	}
+}

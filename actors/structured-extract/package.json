@@ -1,0 +1,33 @@
+{
+	"name": "structured-extract",
+	"version": "0.1.0",
+	"type": "module",
+	"description": "DagPipe Structured Data Extractor — scrapes a URL and extracts structured JSON validated against your schema using a Groq-compatible LLM.",
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"dependencies": {
+		"apify": "^3.4.4",
+		"crawlee": "^3.12.1",
+		"openai": "^4.98.0",
+		"ajv": "^8.17.1",
+		"ajv-formats": "^3.0.1",
+		"zod": "^3.25.76"
+	},
+	"devDependencies": {
+		"@apify/tsconfig": "^0.1.1",
+		"@types/node": "^22.15.32",
+		"typescript": "^5.9.3",
+		"tsx": "^4.20.3",
+		"vitest": "^3.2.4"
+	},
+	"scripts": {
+		"start": "npm run start:dev",
+		"start:prod": "node dist/main.js",
+		"start:dev": "tsx src/main.ts",
+		"build": "tsc",
+		"test": "npx vitest run"
+	},
+	"author": "Herbert (DagPipe)",
+	"license": "ISC"
+}

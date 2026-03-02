@@ -48,9 +48,10 @@ BLUEPRINT.md
 HANDOFF.md
 PROJECT_STATUS.md
 
-# IDEs
+# Development
 .vscode/
 .idea/
+outputs/
 *.swp
 *.swo
 
