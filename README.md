@@ -356,7 +356,7 @@ Phase 3 — Actors + MCP         ██████████░░░░░�
 Phase 4 — Auto-Migrator        ░░░░░░░░░░░░░░░░░░░░  UPCOMING
 ```
 
-**Test coverage:** 37 tests · 4 modules · 0 regressions
+**Test coverage:** 47 tests · 4 modules · 0 regressions
 
 ---
 
