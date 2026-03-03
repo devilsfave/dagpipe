@@ -1,0 +1,7 @@
+{
+    "extraction": {
+        "eventTitle": "Successful structured data extraction",
+        "eventDescription": "Charged once per successful extraction after AJV schema validation passes. Not charged on failure.",
+        "eventPriceUsd": 0.05
+    }
+}

@@ -1,0 +1,92 @@
+{
+    "title": "Structured Data Extractor Input",
+    "description": "Scrapes one or more URLs and extracts structured data validated against a JSON Schema using a Groq-compatible LLM.",
+    "type": "object",
+    "schemaVersion": 1,
+    "required": [
+        "start_urls",
+        "groq_api_key"
+    ],
+    "properties": {
+        "start_urls": {
+            "title": "URLs to scrape",
+            "type": "array",
+            "description": "List of URLs to scrape and extract data from. Each URL is processed independently.",
+            "editor": "requestListSources",
+            "example": [
+                {
+                    "url": "https://example.com/product"
+                }
+            ]
+        },
+        "output_schema": {
+            "title": "Output JSON Schema",
+            "type": "object",
+            "description": "A JSON Schema object describing the structure of the data to extract. If omitted, defaults to an e-commerce product schema.",
+            "editor": "json",
+            "default": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "price"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "in_stock": {
+                        "type": "boolean"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            },
+            "example": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "name",
+                    "price"
+                ]
+            }
+        },
+        "groq_api_key": {
+            "title": "API Key",
+            "type": "string",
+            "description": "Your Groq API key (or API key for any OpenAI-compatible provider). Get a free Groq key at console.groq.com.",
+            "editor": "textfield",
+            "isSecret": true
+        },
+        "model": {
+            "title": "Model name",
+            "type": "string",
+            "description": "Model to use for extraction. Defaults to llama-3.3-70b-versatile (Groq free tier).",
+            "editor": "textfield",
+            "default": "llama-3.3-70b-versatile"
+        },
+        "base_url": {
+            "title": "API Base URL",
+            "type": "string",
+            "description": "Base URL of the OpenAI-compatible API. Defaults to Groq. Use https://api.openai.com/v1 for OpenAI, https://api.together.xyz/v1 for Together AI, or http://localhost:11434/v1 for Ollama.",
+            "editor": "textfield",
+            "default": "https://api.groq.com/openai/v1"
+        }
+    }
+}

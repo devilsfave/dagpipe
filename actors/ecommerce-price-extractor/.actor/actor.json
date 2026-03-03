@@ -1,0 +1,20 @@
+{
+	"actorSpecification": 1,
+	"name": "ecommerce-price-extractor",
+	"title": "E-commerce Price & Product Extractor",
+	"description": "Monitor competitor prices on any online store. Extracts product name, price, currency, stock status, SKU, and description using AI with AJV-validated output. Only charged on successful extraction.",
+	"version": "0.1",
+	"buildTag": "latest",
+	"meta": {
+		"templateId": "ts-mcp-proxy",
+		"generatedBy": "dagpipe"
+	},
+	"input": "./input_schema.json",
+	"dockerfile": "../Dockerfile",
+	"storages": {
+		"dataset": {
+			"actorSpecification": 1,
+			"views": {}
+		}
+	}
+}

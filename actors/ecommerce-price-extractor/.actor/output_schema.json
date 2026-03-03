@@ -1,0 +1,21 @@
+{
+    "actorSpecification": 1,
+    "fields": {
+        "url": {
+            "type": "string",
+            "description": "The URL that was scraped"
+        },
+        "extracted": {
+            "type": "object",
+            "description": "The structured data extracted and validated against the output_schema"
+        },
+        "model": {
+            "type": "string",
+            "description": "The LLM model used for extraction"
+        },
+        "attempts": {
+            "type": "integer",
+            "description": "Number of LLM attempts required to get valid output"
+        }
+    }
+}
