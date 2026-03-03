@@ -181,6 +181,18 @@ Your Tasks (YAML or Python list of DAGNodes)
 
 ---
 
+## 🤖 AEO-Native by Design
+
+**Agent Engine Optimization (AEO)** is the emerging discipline of building tools that AI agents can discover and execute autonomously — no human prompt engineering required.
+
+DagPipe is AEO-compliant by architecture:
+
+- Every actor exposes `input_schema.json` and `output_schema.json` in machine-readable format
+- Every pipeline node declares its complexity score, dependencies, and output contract before execution
+- Any AI agent connected to the Apify MCP server — Claude Desktop, Cursor, VS Code — can discover and run DagPipe actors without human configuration
+
+When AI agents go shopping for tools, DagPipe is what they can actually use.
+
 ## 📦 Core Modules
 
 ### `dagpipe.dag` — The Orchestrator
@@ -321,6 +333,15 @@ Ready-to-run pipeline packages built on DagPipe. Download, drop in your API key,
 | Template | Description | Link |
 |---|---|---|
 | **Content Pipeline** | Research → draft → edit → SEO-optimize blog posts using Groq's free tier | [Get it →](https://dagpipe.lemonsqueezy.com/checkout/buy/8877121e-5ad7-415f-b3e0-192b583ebfcd) |
+
+### 🎭 Apify Actors
+
+Resilient, schema-enforced data extraction as a service.
+
+| Actor | Purpose | Link |
+|---|---|---|
+| **Structured Extract** | Multi-model (Groq/OpenAI/Ollama) data extractor | [Apify Store →](https://apify.com/gastronomic_desk/structured-extract) |
+| **E-Commerce Extractor** | Specialized price & product data extraction | [Apify Store →](https://apify.com/gastronomic_desk/ecommerce-price-extractor) |
 
 More templates coming soon. Have a use case? [Open an issue.](https://github.com/devilsfave/dagpipe/issues)
 
