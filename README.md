@@ -352,7 +352,7 @@ More templates coming soon. Have a use case? [Open an issue.](https://github.com
 ```
 Phase 1 — Core Library         ████████████████████  COMPLETE
 Phase 2 — PyPI + Templates     ████████████████████  COMPLETE  
-Phase 3 — MCP Servers          ░░░░░░░░░░░░░░░░░░░░  UPCOMING
+Phase 3 — Actors + MCP         ██████████░░░░░░░░░░  IN PROGRESS
 Phase 4 — Auto-Migrator        ░░░░░░░░░░░░░░░░░░░░  UPCOMING
 ```
 
