@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
 authors = [{ name = "Herbert" }]
-keywords = ["llm", "pipeline", "dag", "orchestrator", "free-tier", "checkpointing", "structured-output", "pydantic", "langchain-alternative", "llm-pipeline", "ai-pipeline"]
+keywords = ["llm", "ai", "genai", "pipeline", "dag", "orchestrator", "orchestration", "free-tier", "zero-cost", "checkpointing", "crash-recovery", "resilience", "structured-output", "constrained-generation", "pydantic", "json-schema", "function-calling", "tool-use", "agents", "ai-agents", "agentic-workflows", "workflow-engine", "langchain-alternative", "openai-alternative", "groq", "gemini", "task-dependency", "graph-orchestration", "retry-logic", "llm-pipeline"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
