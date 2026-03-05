@@ -9,7 +9,7 @@
 [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=00D9FF&center=true&vCenter=true&multiline=true&repeat=true&width=600&height=80&lines=Zero-cost,+crash-proof+LLM+orchestration;Route+tasks+safely+to+free-tier+models;Never+lose+progress+mid-pipeline)](https://git.io/typing-svg)
 
 <p>
-  <img src="https://img.shields.io/badge/tests-37%20passing-00d9ff?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/tests-47%20passing-00d9ff?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/license-MIT-0d1117?style=flat-square&color=00d9ff" alt="License" />
   <img src="https://img.shields.io/badge/version-0.1.0-FF4500?style=flat-square" alt="Version" />
@@ -185,7 +185,7 @@ Your Tasks (YAML or Python list of DAGNodes)
 
 **Agent Engine Optimization (AEO)** is the emerging discipline of building tools that AI agents can discover and execute autonomously — no human prompt engineering required.
 
-DagPipe is AEO-compliant by architecture:
+DagPipe is designed for AEO by architecture:
 
 - Every actor exposes `input_schema.json` and `output_schema.json` in machine-readable format
 - Every pipeline node declares its complexity score, dependencies, and output contract before execution
@@ -302,8 +302,8 @@ DagPipe is designed to run entirely on free tiers:
 |---|---|---|
 | Groq | Llama 3.3 70B | 30 req/min |
 | Groq | Llama 3 8B | 30 req/min |
-| Google | Gemini 2.0 Flash | 15 req/min |
-| Modal | Any 7B model | 30 GPU-sec/day |
+| Google | Gemini 2.5 Flash | 10 req/min |
+| Modal | Any 7B model | $30/month free credits (Starter plan) |
 | Ollama | Any model | Local, unlimited |
 
 Wire any of these as your `low_complexity_fn`, `high_complexity_fn`, or `fallback_fn`. DagPipe is provider-agnostic.

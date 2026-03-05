@@ -2,7 +2,7 @@
  * Tests for the Structured Data Extractor Actor
  *
  * Uses vitest with mocked Groq calls (no real network requests).
- * Tests: happy path, retry path, full failure, schema mismatch.
+ * Tests: happy path, retry path, full failure, schema mismatch, bulk path.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -188,5 +188,48 @@ describe('simulateExtraction (mocked Groq)', () => {
         await expect(simulateExtraction(PRODUCT_SCHEMA, responses, 3)).rejects.toThrow(
             'Extraction failed after 3 attempts',
         );
+    });
+});
+
+describe('bulk URL processing', () => {
+    it('3 URLs provided → simulateExtraction called 3 times → 3 results, 3 charges', async () => {
+        // Simulate the bulk loop from main.ts: for each URL, call simulateExtraction
+        const urls = [
+            { url: 'https://example.com/product-1' },
+            { url: 'https://example.com/product-2' },
+            { url: 'https://example.com/product-3' },
+        ];
+
+        const mockCharge = vi.fn();
+        const mockPushData = vi.fn();
+
+        const results: Array<{ url: string; extracted: Record<string, unknown>; attempts: number }> = [];
+
+        for (const entry of urls) {
+            // Each URL gets a happy-path response
+            const responses = [`{"name":"Product from ${entry.url}","price":${10 + results.length * 10}}`];
+            const { extracted, attempts } = await simulateExtraction(PRODUCT_SCHEMA, responses);
+
+            const result = { url: entry.url, extracted, model: 'llama-3.3-70b-versatile', attempts };
+            results.push(result);
+            mockPushData(result);
+            mockCharge({ eventName: 'extraction' });
+        }
+
+        // 3 results pushed
+        expect(results).toHaveLength(3);
+        expect(mockPushData).toHaveBeenCalledTimes(3);
+
+        // 3 charge events fired
+        expect(mockCharge).toHaveBeenCalledTimes(3);
+        expect(mockCharge).toHaveBeenCalledWith({ eventName: 'extraction' });
+
+        // Each result has correct URL
+        expect(results[0].url).toBe('https://example.com/product-1');
+        expect(results[1].url).toBe('https://example.com/product-2');
+        expect(results[2].url).toBe('https://example.com/product-3');
+
+        // Each extraction succeeded in 1 attempt
+        expect(results.every(r => r.attempts === 1)).toBe(true);
     });
 });

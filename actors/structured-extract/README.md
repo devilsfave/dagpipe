@@ -1,8 +1,12 @@
 # Structured Data Extractor
 
-**Extract structured JSON from any webpage using a Groq-compatible LLM.**
+**Extract structured JSON from any webpage using a Groq-compatible LLM. Only pay on successful extraction — $0.05 per result, nothing charged on failure or retries.**
 
-Provide a URL + a JSON Schema → get back validated, structured data. Works with Groq (free), OpenAI, Together AI, Fireworks AI, and Ollama.
+Provide a URL + a JSON Schema → get back validated, structured data. Works with Groq (free tier — no credit card), OpenAI, Together AI, Fireworks AI, and Ollama. Built on [DagPipe](https://github.com/devilsfave/dagpipe) — the crash-proof, free-tier LLM pipeline library.
+
+```bash
+pip install dagpipe-core
+```
 
 [![Apify Actor](https://img.shields.io/badge/Apify-Actor-brightgreen)](https://apify.com/store)
 [![PPE Pricing](https://img.shields.io/badge/Price-%240.05%2Fextraction-blue)](https://docs.apify.com/platform/actors/monetization/pay-per-event)
@@ -31,6 +35,46 @@ Provide a URL + a JSON Schema → get back validated, structured data. Works wit
 | `groq_api_key` | string | ✅ | — | API key (Groq, OpenAI, Together AI, etc.) |
 | `model` | string | ❌ | `llama-3.3-70b-versatile` | Model name |
 | `base_url` | string | ❌ | Groq endpoint | For OpenAI-compatible providers |
+
+---
+
+## ⚡ 60-Second Quickstart
+
+1. Get a free Groq API key at [console.groq.com](https://console.groq.com/) — no credit card required.
+2. Paste the input below into the actor's **Input** tab on Apify.
+3. Click **Start** — structured JSON arrives in your dataset in seconds.
+
+```json
+{
+    "url": "https://news.ycombinator.com",
+    "groq_api_key": "gsk_YOUR_GROQ_KEY_HERE",
+    "output_schema": {
+        "type": "object",
+        "required": ["top_story", "score"],
+        "properties": {
+            "top_story": { "type": "string" },
+            "score":     { "type": "integer" },
+            "url":       { "type": "string" }
+        }
+    }
+}
+```
+
+**Expected output:**
+```json
+{
+    "url": "https://news.ycombinator.com",
+    "extracted": {
+        "top_story": "Show HN: DagPipe — crash-resilient LLM pipelines",
+        "score": 312,
+        "url": "https://github.com/devilsfave/dagpipe"
+    },
+    "model": "llama-3.3-70b-versatile",
+    "attempts": 1
+}
+```
+
+No infrastructure. No subscription. **You are only charged ($0.05) if the extraction succeeds.**
 
 ---
 

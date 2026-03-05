@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
 authors = [{ name = "Herbert" }]
-keywords = ["llm", "pipeline", "orchestrator", "dag", "checkpoints"]
+keywords = ["llm", "pipeline", "dag", "orchestrator", "free-tier", "checkpointing", "structured-output", "pydantic", "langchain-alternative", "llm-pipeline", "ai-pipeline"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -24,7 +24,10 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/devilsfave/dagpipe"
+Documentation = "https://github.com/devilsfave/dagpipe#readme"
 Repository = "https://github.com/devilsfave/dagpipe"
+Issues = "https://github.com/devilsfave/dagpipe/issues"
+Changelog = "https://github.com/devilsfave/dagpipe/releases"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

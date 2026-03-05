@@ -1,8 +1,12 @@
 # E-Commerce Price Extractor
 
-**Only pay when it works. $0.05 per verified extraction — nothing charged on failure or retries.**
+**Only pay on successful extraction — $0.05 per verified result, nothing charged on failure or retries.**
 
-Extract structured JSON from any product page using a Groq-compatible LLM.
+Extract structured pricing and product data from any e-commerce page using a Groq-compatible LLM. Works with Groq (free tier — no credit card), OpenAI, Together AI, Fireworks AI, and Ollama. Built on [DagPipe](https://github.com/devilsfave/dagpipe) — the crash-proof, free-tier LLM pipeline library.
+
+```bash
+pip install dagpipe-core
+```
 
 ## AI Agent Compatible
 
@@ -18,6 +22,39 @@ This actor is AEO-native. The `input_schema.json` and `output_schema.json` expos
 6. **Returns** validated structured data in the Apify dataset
 
 **Charge:** `$0.05` per successful extraction. Nothing charged on failure.
+
+---
+
+## ⚡ 60-Second Quickstart
+
+1. Get a free Groq API key at [console.groq.com](https://console.groq.com/) — no credit card required.
+2. Paste the input below into the actor's **Input** tab on Apify.
+3. Click **Start** — price and product data arrives in your dataset in seconds.
+
+```json
+{
+    "url": "https://example.com/product/widget-pro",
+    "groq_api_key": "gsk_YOUR_GROQ_KEY_HERE"
+}
+```
+
+**Expected output** (uses built-in e-commerce schema — no schema definition needed):
+```json
+{
+    "url": "https://example.com/product/widget-pro",
+    "extracted": {
+        "product_name": "Widget Pro",
+        "price": 29.99,
+        "currency": "USD",
+        "in_stock": true,
+        "description": "The best widget on the market."
+    },
+    "model": "llama-3.3-70b-versatile",
+    "attempts": 1
+}
+```
+
+No infrastructure. No subscription. **You are only charged ($0.05) if the extraction succeeds.**
 
 ---
 

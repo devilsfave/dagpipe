@@ -1,7 +1,7 @@
 /**
  * DagPipe — Structured Data Extractor Actor
  *
- * Scrapes a URL with CheerioCrawler, sends plain text + a JSON Schema
+ * Scrapes one or more URLs with CheerioCrawler, sends plain text + a JSON Schema
  * to a Groq-compatible LLM, validates the response with AJV, retries
  * up to 3 times on failure, and charges $0.05 per successful extraction.
  *
@@ -20,7 +20,7 @@ import addFormats from 'ajv-formats';
 
 /** Input schema validated at runtime via AJV against .actor/input_schema.json */
 interface ActorInput {
-    url: string;
+    start_urls: Array<{ url: string }> | string[];
     output_schema: Record<string, unknown>;
     groq_api_key: string;
     model?: string;
@@ -207,6 +207,15 @@ function extractJson(raw: string): string {
     return text; // Let JSON.parse report the error
 }
 
+/**
+ * Normalises a start_urls entry to a plain URL string.
+ * Handles both { url: string } object format and raw string format.
+ */
+function resolveUrl(entry: { url: string } | string): string {
+    if (typeof entry === 'string') return entry;
+    return entry.url;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────────────────────────────────────────
@@ -215,14 +224,17 @@ await Actor.init();
 
 const input = (await Actor.getInput<ActorInput>())!;
 
-if (!input?.url) throw new Error('Input field "url" is required.');
+if (!input?.start_urls || input.start_urls.length === 0) {
+    throw new Error('Input field "start_urls" is required and must contain at least one URL.');
+}
 if (!input?.output_schema) throw new Error('Input field "output_schema" is required.');
 if (!input?.groq_api_key) throw new Error('Input field "groq_api_key" is required.');
 
 const model = input.model ?? DEFAULT_MODEL;
 const baseURL = input.base_url ?? DEFAULT_BASE_URL;
+const outputSchema = input.output_schema;
 
-log.info('Starting structured extraction', { url: input.url, model });
+log.info(`Starting structured extraction for ${input.start_urls.length} URL(s)`, { model });
 
 // Configure OpenAI-compatible client (works with Groq, Together, Fireworks, Ollama)
 const client = new OpenAI({
@@ -230,32 +242,30 @@ const client = new OpenAI({
     baseURL,
 });
 
-// Step 1: Scrape the page
-log.info('Scraping URL...', { url: input.url });
-const pageText = await scrapeUrl(input.url);
-log.info(`Scraped ${pageText.length} characters of text`);
+// Process each URL independently — failures are logged and skipped
+for (const entry of input.start_urls) {
+    const url = resolveUrl(entry);
 
-// Step 2: Extract structured data with retry
-const { extracted, attempts } = await extractWithRetry(
-    pageText,
-    input.output_schema,
-    client,
-    model,
-);
+    try {
+        // Step 1: Scrape the page
+        log.info('Scraping URL...', { url });
+        const pageText = await scrapeUrl(url);
+        log.info(`Scraped ${pageText.length} characters of text`, { url });
 
-// Step 3: Push result to dataset
-const result: ExtractionResult = {
-    url: input.url,
-    extracted,
-    model,
-    attempts,
-};
+        // Step 2: Extract structured data with retry
+        const { extracted, attempts } = await extractWithRetry(pageText, outputSchema, client, model);
 
-await Actor.pushData(result);
+        // Step 3: Push result to dataset
+        const result: ExtractionResult = { url, extracted, model, attempts };
+        await Actor.pushData(result);
 
-// Step 4: Charge $0.05 per successful extraction (PPE)
-await Actor.charge({ eventName: 'extraction' });
+        // Step 4: Charge $0.05 per successful extraction (PPE)
+        await Actor.charge({ eventName: 'extraction' });
 
-log.info('Extraction complete ✅', { url: input.url, attempts });
+        log.info('Extraction complete ✅', { url, attempts });
+    } catch (err) {
+        log.error(`Failed to process URL — skipping`, { url, error: String(err) });
+    }
+}
 
 await Actor.exit();
