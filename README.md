@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/license-MIT-0d1117?style=flat-square&color=00d9ff" alt="License" />
   <img src="https://img.shields.io/badge/version-0.1.0-FF4500?style=flat-square" alt="Version" />
-  [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12089/badge)](https://www.bestpractices.dev/projects/12089)
+  <a href="https://www.bestpractices.dev/projects/12089"><img src="https://www.bestpractices.dev/projects/12089/badge" alt="OpenSSF Best Practices" /></a>
 </p>
 
 </div>
