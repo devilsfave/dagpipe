@@ -1,0 +1,13 @@
+{
+    "actorOutputSchemaVersion": 1,
+    "title": "Pipeline Generator Output",
+    "description": "The generated Python pipeline codebase.",
+    "type": "object",
+    "properties": {
+        "zipUrl": {
+            "type": "string",
+            "title": "Pipeline ZIP File",
+            "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/latest_pipeline.zip"
+        }
+    }
+}

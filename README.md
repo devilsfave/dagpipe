@@ -9,7 +9,7 @@
 [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=00D9FF&center=true&vCenter=true&multiline=true&repeat=true&width=600&height=80&lines=Zero-cost,+crash-proof+LLM+orchestration;Route+tasks+safely+to+free-tier+models;Never+lose+progress+mid-pipeline)](https://git.io/typing-svg)
 
 <p>
-  <img src="https://img.shields.io/badge/tests-47%20passing-00d9ff?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/tests-59%20passing-00d9ff?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/license-MIT-0d1117?style=flat-square&color=00d9ff" alt="License" />
   <img src="https://img.shields.io/badge/version-0.1.0-FF4500?style=flat-square" alt="Version" />
@@ -20,9 +20,23 @@
 
 ---
 
-###  Stop paying for failed LLM pipelines.
+### DagPipe is the reliability layer that makes AI-generated workflows safe to ship — crash recovery, schema validation, and cost routing in 150 lines of Python.
 
-Building with LLMs is too expensive and too fragile. Pipelines break mid-run. Rate limits waste your completed work. Paying for GPT-4 to handle every single node is massive overkill. **DagPipe fixes all three.**
+---
+
+## 🚀 The Star: Pipeline Generator (Apify Actor)
+
+Don't want to write code? **Generate entire DagPipe workflows instantly.**
+
+We deployed a fully managed AI agent that translates plain English into production-ready DagPipe codebases. It automatically handles the routing, schema design, and topological sorting for you. 
+
+[👉 **Run Pipeline Generator on Apify ($0.05/run)**](https://apify.com/gastronomic_desk/pipeline-generator)
+
+---
+
+##  Stop paying for failed LLM pipelines.
+
+Building with LLMs is too expensive and too fragile. Pipelines break mid-run. Rate limits waste your completed work. Paying for massive frontier models to handle every single node is overkill. **DagPipe fixes all three.**
 
 It turns any multi-step LLM workflow into a resilient, checkpointed DAG that routes tasks to the right free-tier model — and resumes exactly from the last successful step if anything goes wrong.
 
@@ -83,30 +97,30 @@ def publish(context, model):
 # ── 2. Wire your LLM providers ────────────────────────────────
 # DagPipe handles ANY Python callable. Mix and match providers:
 
-from openai import OpenAI
+from google.genai import Client
 import groq
 
-# Example A: A paid OpenAI model for complex tasks
-openai_client = OpenAI()
-def gpt_4o(messages):
-    return openai_client.chat.completions.create(
-        model="gpt-4o", messages=messages
+# Example A: A blazing fast 70B model for complex tasks (Groq Llama 3.3)
+groq_client = groq.Groq()
+def llama33_70b(messages):
+    return groq_client.chat.completions.create(
+        model="llama-3.3-70b-versatile", messages=messages
     ).choices[0].message.content
 
-# Example B: A free Groq (or local Ollama) model for easy tasks
-groq_client = groq.Groq()
-def groq_8b(messages):
-    return groq_client.chat.completions.create(
-        model="llama3-8b-8192", messages=messages
-    ).choices[0].message.content
+# Example B: A high-rate-limit free-tier for easy tasks (Gemini 2.5 Flash)
+gemini_client = Client()
+def gemini_flash(messages):
+    return gemini_client.models.generate_content(
+        model='gemini-2.5-flash', contents=messages[0]["content"]
+    ).text
 
 
 # ── 3. Build the router ───────────────────────────────────────
 # Save money by assigning cheap models to low-complexity tasks
 router = ModelRouter(
-    low_complexity_fn=groq_8b,       low_label="free_llama3",
-    high_complexity_fn=gpt_4o,       high_label="paid_gpt4o",
-    fallback_fn=groq_8b,             fallback_label="fallback_llama3",
+    low_complexity_fn=gemini_flash,  low_label="google_gemini_flash",
+    high_complexity_fn=llama33_70b,  high_label="groq_llama_33",
+    fallback_fn=gemini_flash,        fallback_label="fallback_gemini",
     complexity_threshold=0.6,
 )
 
@@ -130,7 +144,7 @@ orchestrator = PipelineOrchestrator(
         "publish":     publish,
     },
     router=router,
-    checkpoint_backend=FilesystemCheckpoint(Path(".dagpipe/checkpoints")),
+    checkpoint_dir=Path(".dagpipe/checkpoints"),
     max_retries=3,
     on_node_complete=lambda node_id, result, duration:
         print(f"  ✓ {node_id} ({duration:.1f}s)"),
@@ -182,6 +196,14 @@ Your Tasks (YAML or Python list of DAGNodes)
 
 ---
 
+## ⏱️ Sequential Execution
+
+> Default Behavior: **v0.1.x runs nodes sequentially.**
+
+Even if nodes are topologically independent, the orchestrator executes them one-at-a-time to ensure maximum crash predictability. Parallel execution is explicitly on the roadmap for v0.2.0.
+
+---
+
 ## 🤖 AEO-Native by Design
 
 **Agent Engine Optimization (AEO)** is the emerging discipline of building tools that AI agents can discover and execute autonomously — no human prompt engineering required.
@@ -200,7 +222,7 @@ When AI agents go shopping for tools, DagPipe is what they can actually use.
 The central engine. Loads a DAG from a Python list or YAML file, sorts nodes by dependency, and executes them in order with checkpointing and retry.
 
 ```python
-from dagpipe.dag import PipelineOrchestrator, DAGNode, load_dag, FilesystemCheckpoint
+from dagpipe.dag import PipelineOrchestrator, DAGNode, load_dag
 
 # Load from YAML
 nodes = load_dag(Path("my_pipeline.yaml"))
@@ -212,14 +234,27 @@ nodes = [DAGNode(id="step_a", fn_name="fn_a", complexity=0.3)]
 ### `dagpipe.checkpoints` — Crash Recovery
 Saves node output to disk after every successful execution. On resume, completed nodes are skipped entirely.
 
-> **Note**: In `v0.1.0`, passing `checkpoint_dir` directly is deprecated. The orchestrator now uses the `CheckpointStorage` protocol (`checkpoint_backend=FilesystemCheckpoint(path)`). Any backend (Redis, S3, Memory) can be used by implementing the `CheckpointStorage` protocol.
+> **New in v0.1.0:** The `CheckpointStorage` Protocol. 
+
+You must pass a backend explicitly to the Orchestrator via `checkpoint_backend`. `FilesystemCheckpoint` is provided out of the box, but you can build custom backends (Redis, S3, Memory) by implementing the protocol:
 
 ```python
-from dagpipe.checkpoints import checkpoint, restore, checkpoint_exists
+from dagpipe.dag import CheckpointStorage
 
-checkpoint("node_id", {"output": "data"}, checkpoint_dir=Path(".dagpipe"))
-data = restore("node_id", checkpoint_dir=Path(".dagpipe"))  # None if not found
+class RedisCheckpoint(CheckpointStorage):
+    def save(self, node_id: str, data: dict) -> None:
+        redis_client.set(node_id, json.dumps(data))
+    
+    def load(self, node_id: str) -> dict | None:
+        return json.loads(redis_client.get(node_id) or "null")
+        
+    def exists(self, node_id: str) -> bool:
+        return redis_client.exists(node_id) > 0
+        
+    def clear(self) -> None:
+        redis_client.flushdb()
 ```
+*(Note: Passing `checkpoint_dir` directly to the Orchestrator is deprecated).*
 
 ### `dagpipe.router` — Intelligent Model Selection
 Routes tasks to the cheapest model that can handle them. Tracks rate limit budgets and escalates on retry.
@@ -343,6 +378,7 @@ Resilient, schema-enforced data extraction as a service.
 
 | Actor | Purpose | Link |
 |---|---|---|
+| **Pipeline Generator** | 🌟 **The flagship workflow architect** | [Apify Store →](https://apify.com/gastronomic_desk/pipeline-generator) |
 | **Structured Extract** | Multi-model (Groq/OpenAI/Ollama) data extractor | [Apify Store →](https://apify.com/gastronomic_desk/structured-extract) |
 | **E-Commerce Extractor** | Specialized price & product data extraction | [Apify Store →](https://apify.com/gastronomic_desk/ecommerce-price-extractor) |
 
@@ -359,7 +395,7 @@ Phase 3 — Actors + MCP         ██████████░░░░░�
 Phase 4 — Auto-Migrator        ░░░░░░░░░░░░░░░░░░░░  UPCOMING
 ```
 
-**Test coverage:** 47 tests · 4 modules · 0 regressions
+**Test coverage:** 59 tests · 4 modules · 0 regressions
 
 ---
 

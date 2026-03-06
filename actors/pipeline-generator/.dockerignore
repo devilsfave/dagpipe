@@ -1,0 +1,16 @@
+node_modules/
+dist/
+dist-types/
+.actor/storage/
+actor/storage/
+storage/
+.git/
+test/
+tests/
+tmp/
+*.log
+.env
+.venv
+venv
+__pycache__
+*.pyc

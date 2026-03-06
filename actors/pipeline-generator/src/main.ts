@@ -74,13 +74,14 @@ if (existsSync(zipPath)) {
         files: result.files_included
     });
 
+    // Charge BEFORE announcing success
+    await Actor.charge({ eventName: 'generator-run', count: 1 });
+    log.info("PPE charge fired successfully for event: generator-run");
+
     log.info(`Download your zip here: ${downloadUrl}`);
 } else {
     throw new Error(`Zip file not found at expected path: ${zipPath}`);
 }
-
-// Charge the user $0.05 per successful run
-await Actor.charge({ eventName: 'generator-run', count: 1 });
 
 log.info("Finished execution.");
 await Actor.exit();

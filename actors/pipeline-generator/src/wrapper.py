@@ -3,8 +3,10 @@ import os
 import json
 from pathlib import Path
 
-# Add the local copy of the dagpipe library to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'dagpipe_lib')))
+# Add the src/ directory (parent of the dagpipe package) to sys.path
+# so that `from dagpipe.generator.pipeline_generator import run_generator` resolves correctly.
+# Directory structure: src/dagpipe/__init__.py, src/dagpipe/generator/pipeline_generator.py
+sys.path.insert(0, os.path.dirname(__file__))  # inserts src/ into path
 
 from groq import Groq
 from dagpipe.generator.pipeline_generator import run_generator

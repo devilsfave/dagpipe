@@ -1,5 +1,5 @@
 {
-    "extends": "./node_modules/@apify/tsconfig/tsconfig.json",
+    "extends": "@apify/tsconfig",
     "compilerOptions": {
         "module": "NodeNext",
         "moduleResolution": "NodeNext",

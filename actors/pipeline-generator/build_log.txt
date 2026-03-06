@@ -1,0 +1,9 @@
+Info: Deploying Actor 'pipeline-generator' to Apify.
+Run: Updated version 0.1 for Actor pipeline-generator.
+Run: Building Actor pipeline-generator
+2026-03-06T21:29:10.701Z ACTOR: Found input schema referenced from .actor/actor.json
+2026-03-06T21:29:11.155Z ACTOR: Found dataset schema referenced from .actor/actor.json
+2026-03-06T21:29:11.157Z ACTOR: ERROR: .actor/dataset_schema.json: actorSpecification value differs from the one in actor.json
+Actor build detail https://console.apify.com/actors/bA3XHUma3yr3JFmxg#/builds/0.1.13
+Actor detail https://console.apify.com/actors/bA3XHUma3yr3JFmxg
+Error: Build failed!

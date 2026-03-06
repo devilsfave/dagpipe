@@ -1,35 +1,35 @@
+# ── Stage 1: Builder (TypeScript compilation) ────────────────────────────────
 FROM apify/actor-node:22 AS builder
 
-# Copy package.json to speed up the build using Docker layer cache
 COPY --chown=myuser:myuser package*.json ./
 RUN npm install --include=dev --audit=false
 
-# Copy all files including JS/TS source code and local Python dependencies into the image
 COPY --chown=myuser:myuser . ./
 RUN npm run build
 
+# ── Stage 2: Runtime ──────────────────────────────────────────────────────────
+# IMPORTANT: Stay as the default user (myuser) the ENTIRE time.
+# Never switch to root after npm install — it corrupts npm's rename locks.
 FROM apify/actor-node:22
 
-USER root
-# Install python and pip to run the backend generator engine
-RUN apt-get update && apt-get install -y python3 python3-pip python3-venv \
-    && rm -rf /var/lib/apt/lists/*
-USER myuser
-
+# Install production npm packages FIRST (as myuser, which is the image default).
 COPY --chown=myuser:myuser package*.json ./
 RUN npm --quiet set progress=false \
     && npm install --omit=dev --omit=optional \
-    && rm -r ~/.npm
+    && echo "Node.js: $(node --version) | npm: $(npm --version)" \
+    && rm -rf ~/.npm
 
-# Create a virtual environment and install python dependencies needed by dagpipe
-RUN python3 -m venv /home/myuser/venv
-ENV PATH="/home/myuser/venv/bin:$PATH"
-RUN pip install groq pyyaml pydantic
+# Now switch to root ONLY to install system packages, AFTER npm is done.
+USER root
+RUN apk add --no-cache python3 py3-pip
+# Install Python packages globally so myuser can run them
+RUN pip install --no-cache-dir --break-system-packages groq pyyaml pydantic
+USER myuser
 
-# Copy the built TS files from the builder stage
+# Copy compiled TS from builder
 COPY --from=builder --chown=myuser:myuser /usr/src/app/dist ./dist
 
-# Copy the remaining project files (including src/wrapper.py and src/dagpipe_lib)
+# Copy all source files (wrapper.py, src/dagpipe_lib, etc.)
 COPY --chown=myuser:myuser . ./
 
 CMD ["node", "dist/main.js"]
