@@ -24,24 +24,6 @@
 
 ---
 
-## Two Ways to Use DagPipe
-
-**For developers** — Install the library and build crash-proof 
-LLM pipelines in Python:
-```bash
-pip install dagpipe-core
-```
-
-**For everyone** — Describe your workflow in plain English. 
-Receive production-ready, crash-proof pipeline code as a 
-downloadable zip. No coding required:
-[👉 Pipeline Generator on Apify ($0.05/run)](https://apify.com/gastronomic_desk/pipeline-generator)
-
-> The generator outputs DagPipe pipelines — so every generated 
-> zip is already wired with crash recovery, schema validation, 
-> and cost routing from the library above.
-
----
 
 ##  Stop paying for failed LLM pipelines.
 
@@ -64,6 +46,19 @@ It turns any multi-step LLM workflow into a resilient, checkpointed DAG that rou
 | Fragile sequential scripts | **Topological DAG execution** — safe dependency resolution |
 
 </div>
+
+---
+
+## Two Ways to Use DagPipe
+
+**For developers** — Install the library and build crash-proof LLM pipelines in Python:
+```bash
+pip install dagpipe-core
+```
+
+**For everyone** — Describe your workflow in plain English. Receive production-ready, crash-proof pipeline code as a downloadable zip. No coding required: [👉 Pipeline Generator on Apify ($0.05/run)](https://apify.com/gastronomic_desk/pipeline-generator)
+
+> The generator outputs DagPipe pipelines — so every generated zip is already wired with crash recovery, schema validation, and cost routing from the library above.
 
 ---
 
