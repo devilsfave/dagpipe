@@ -5,8 +5,13 @@ Python decides — LLM never sees the routing logic.
 
 The router does NOT own LLM clients. Users pass provider callables at init.
 The router only decides WHICH callable to invoke based on complexity score.
+
+Changelog:
+    v0.1.1 — Renamed `groq_rpm_limit` → `rpm_limit` (provider-agnostic).
+              `groq_rpm_limit` still accepted but emits DeprecationWarning.
 """
 import time
+import warnings
 from typing import Callable
 
 
@@ -73,7 +78,8 @@ class ModelRouter:
         high_label: Human-readable label for the high-complexity provider.
         fallback_label: Human-readable label for the fallback provider.
         complexity_threshold: Score at which to escalate from low to high.
-        groq_rpm_limit: Max calls per minute for high_complexity_fn.
+        rpm_limit: Max calls per minute for high_complexity_fn (provider-agnostic).
+        groq_rpm_limit: Deprecated alias for rpm_limit. Will be removed in v0.2.0.
     """
 
     def __init__(
@@ -85,8 +91,18 @@ class ModelRouter:
         high_label: str = "high",
         fallback_label: str = "fallback",
         complexity_threshold: float = 0.7,
-        groq_rpm_limit: int = 30,
+        rpm_limit: int = 30,
+        groq_rpm_limit: int | None = None,  # deprecated — remove in v0.2.0
     ) -> None:
+        if groq_rpm_limit is not None:
+            warnings.warn(
+                "groq_rpm_limit is deprecated and will be removed in v0.2.0. "
+                "Use rpm_limit instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            rpm_limit = groq_rpm_limit
+
         self._low_fn = low_complexity_fn
         self._high_fn = high_complexity_fn
         self._fallback_fn = fallback_fn
@@ -94,10 +110,10 @@ class ModelRouter:
         self._high_label = high_label
         self._fallback_label = fallback_label
         self._threshold = complexity_threshold
-        self._rpm_limit = groq_rpm_limit
+        self._rpm_limit = rpm_limit
 
         # Rate limit budget tracker
-        self._calls_remaining = groq_rpm_limit
+        self._calls_remaining = rpm_limit
         self._last_reset = time.time()
         self._window_s = 60
 
@@ -154,7 +170,14 @@ class ModelRouter:
         Returns:
             Tuple of (callable, label_string).
         """
-        if any(kw in last_error for kw in ("Access denied", "APIError", "rate limit")):
+        # Provider-agnostic error patterns — covers Groq, OpenAI, Anthropic, Gemini etc.
+        _ACCESS_ERRORS = (
+            "Access denied", "access denied",
+            "APIError", "api_error",
+            "rate limit", "RateLimitError", "429",
+            "insufficient_quota", "authentication", "AuthenticationError",
+        )
+        if any(kw in last_error for kw in _ACCESS_ERRORS):
             return self._fallback_fn, self._fallback_label
 
         escalated = min(1.0, complexity + (attempt * 0.2))

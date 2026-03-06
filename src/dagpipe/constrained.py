@@ -104,6 +104,9 @@ def _generate_pydantic_retry(
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PATH A: OUTLINES (optional — requires `pip install outlines`)
+# STATUS: NOT YET IMPLEMENTED — always falls back to pydantic_retry.
+#         Do not rely on mode="outlines" producing token-level constraints.
+#         Tracked in: https://github.com/devilsfave/dagpipe/issues (Phase 4)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _generate_outlines(
@@ -112,10 +115,14 @@ def _generate_outlines(
     llm_call_fn,
     **llm_kwargs,
 ) -> T:
-    """Outlines with OpenAI-compatible backend.
+    """[NOT YET IMPLEMENTED] Outlines with OpenAI-compatible backend.
 
-    Falls back to pydantic_retry if outlines is not installed or
-    remote API wiring is not yet stable.
+    Currently always falls back to pydantic_retry. Token-level grammar
+    constraints via the Outlines library are not yet wired for remote
+    OpenAI-compatible endpoints. When this is stabilised it will be
+    fully opt-in via mode='outlines'.
+
+    Fallback: delegates to _generate_pydantic_retry unconditionally.
     """
     try:
         import outlines  # noqa: F401

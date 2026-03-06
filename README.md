@@ -104,9 +104,9 @@ def groq_8b(messages):
 # ── 3. Build the router ───────────────────────────────────────
 # Save money by assigning cheap models to low-complexity tasks
 router = ModelRouter(
-    low_complexity_fn=groq_8b,       label_low="free_llama3",
-    high_complexity_fn=gpt_4o,       label_high="paid_gpt4o",
-    fallback_fn=groq_8b,             label_fallback="fallback_llama3",
+    low_complexity_fn=groq_8b,       low_label="free_llama3",
+    high_complexity_fn=gpt_4o,       high_label="paid_gpt4o",
+    fallback_fn=groq_8b,             fallback_label="fallback_llama3",
     complexity_threshold=0.6,
 )
 
@@ -229,9 +229,9 @@ score = classify_complexity("implement OAuth authentication", token_count=1200)
 # → 0.8 (high — triggers high_complexity_fn)
 
 router = ModelRouter(
-    low_complexity_fn=cheap_model,   label_low="7b",
-    high_complexity_fn=smart_model,  label_high="70b",
-    fallback_fn=backup_model,        label_fallback="backup",
+    low_complexity_fn=cheap_model,   low_label="7b",
+    high_complexity_fn=smart_model,  high_label="70b",
+    fallback_fn=backup_model,        fallback_label="backup",
 )
 fn, label = router.route(complexity=0.8)
 ```

@@ -48,6 +48,11 @@ BLUEPRINT.md
 HANDOFF.md
 PROJECT_STATUS.md
 
+# Internal session / AI council documents (never push to public repo)
+DISCUSSION.md
+SESSION_1_PROMPTS.md
+CONVERGENCE_CONTEXT.md
+
 # Development
 .vscode/
 .idea/
