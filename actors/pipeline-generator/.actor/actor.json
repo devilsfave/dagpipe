@@ -1,0 +1,12 @@
+{
+    "actorSpecification": 1,
+    "name": "pipeline-generator",
+    "title": "DagPipe Pipeline Generator ($0.05)",
+    "description": "The easiest way to generate a custom, crash-proof LLM automation. Just type what you want in plain English.",
+    "version": "0.1",
+    "meta": {
+        "templateId": "ts-empty"
+    },
+    "dockerfile": "./Dockerfile",
+    "input": "./input_schema.json"
+}

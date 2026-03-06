@@ -4,7 +4,7 @@ import yaml
 from pathlib import Path
 from typing import Any
 
-from dagpipe.dag import DAGNode, load_dag, topological_sort, PipelineOrchestrator
+from dagpipe.dag import DAGNode, load_dag, topological_sort, PipelineOrchestrator, FilesystemCheckpoint
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -123,7 +123,7 @@ def test_pipeline_runs_two_nodes_e2e(tmp_path: Path) -> None:
     orch = PipelineOrchestrator(
         nodes=nodes,
         node_registry=registry,
-        checkpoint_dir=tmp_path / "ckpt",
+        checkpoint_backend=FilesystemCheckpoint(tmp_path / "ckpt"),
     )
     result = orch.run(initial_state={"topic": "DagPipe"})
 
@@ -151,14 +151,14 @@ def test_checkpoint_skip(tmp_path: Path) -> None:
 
     # First run — executes normally
     orch1 = PipelineOrchestrator(
-        nodes=nodes, node_registry=registry, checkpoint_dir=ckpt_dir
+        nodes=nodes, node_registry=registry, checkpoint_backend=FilesystemCheckpoint(ckpt_dir)
     )
     orch1.run()
     assert call_count["research"] == 1
 
     # Second run — should skip (checkpoint exists)
     orch2 = PipelineOrchestrator(
-        nodes=nodes, node_registry=registry, checkpoint_dir=ckpt_dir
+        nodes=nodes, node_registry=registry, checkpoint_backend=FilesystemCheckpoint(ckpt_dir)
     )
     orch2.run()
     assert call_count["research"] == 1  # NOT incremented
@@ -176,7 +176,7 @@ def test_failed_node_raises_runtime_error(tmp_path: Path) -> None:
     orch = PipelineOrchestrator(
         nodes=nodes,
         node_registry=registry,
-        checkpoint_dir=tmp_path / "ckpt",
+        checkpoint_backend=FilesystemCheckpoint(tmp_path / "ckpt"),
         max_retries=2,
     )
     with pytest.raises(RuntimeError, match="Pipeline failed at node 'broken'"):
@@ -203,7 +203,7 @@ def test_on_node_complete_callback(tmp_path: Path) -> None:
     orch = PipelineOrchestrator(
         nodes=nodes,
         node_registry=registry,
-        checkpoint_dir=tmp_path / "ckpt",
+        checkpoint_backend=FilesystemCheckpoint(tmp_path / "ckpt"),
         on_node_complete=on_complete,
     )
     orch.run()
@@ -233,7 +233,7 @@ def test_deterministic_nodes_pass_model_none(tmp_path: Path) -> None:
         nodes=nodes,
         node_registry=registry,
         router=dummy_router,
-        checkpoint_dir=tmp_path / "ckpt",
+        checkpoint_backend=FilesystemCheckpoint(tmp_path / "ckpt"),
     )
     result = orch.run()
 

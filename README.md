@@ -130,7 +130,7 @@ orchestrator = PipelineOrchestrator(
         "publish":     publish,
     },
     router=router,
-    checkpoint_dir=Path(".dagpipe/checkpoints"),
+    checkpoint_backend=FilesystemCheckpoint(Path(".dagpipe/checkpoints")),
     max_retries=3,
     on_node_complete=lambda node_id, result, duration:
         print(f"  ✓ {node_id} ({duration:.1f}s)"),
@@ -200,7 +200,7 @@ When AI agents go shopping for tools, DagPipe is what they can actually use.
 The central engine. Loads a DAG from a Python list or YAML file, sorts nodes by dependency, and executes them in order with checkpointing and retry.
 
 ```python
-from dagpipe.dag import PipelineOrchestrator, DAGNode, load_dag
+from dagpipe.dag import PipelineOrchestrator, DAGNode, load_dag, FilesystemCheckpoint
 
 # Load from YAML
 nodes = load_dag(Path("my_pipeline.yaml"))
@@ -211,6 +211,8 @@ nodes = [DAGNode(id="step_a", fn_name="fn_a", complexity=0.3)]
 
 ### `dagpipe.checkpoints` — Crash Recovery
 Saves node output to disk after every successful execution. On resume, completed nodes are skipped entirely.
+
+> **Note**: In `v0.1.0`, passing `checkpoint_dir` directly is deprecated. The orchestrator now uses the `CheckpointStorage` protocol (`checkpoint_backend=FilesystemCheckpoint(path)`). Any backend (Redis, S3, Memory) can be used by implementing the `CheckpointStorage` protocol.
 
 ```python
 from dagpipe.checkpoints import checkpoint, restore, checkpoint_exists

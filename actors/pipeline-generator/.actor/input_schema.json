@@ -1,0 +1,26 @@
+{
+    "title": "DagPipe Premium Pipeline Generator",
+    "description": "Describe your automation in plain English and automatically receive a robust, crash-proof DagPipe Python workflow.",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "description": {
+            "title": "Pipeline Description",
+            "type": "string",
+            "description": "Provide a clear, plain-English description of what you want your pipeline to do.\n\n**Example:** *'I need a pipeline that reads a tech blog post URL, summarizes the key points, attempts to translate the summary into Spanish, and saves both to a JSON file.'*",
+            "editor": "textarea",
+            "prefill": "I want a pipeline that takes a URL, extracts the main article, analyzes sentiment, and outputs a structured JSON report."
+        },
+        "groq_api_key": {
+            "title": "Groq API Key (Secure)",
+            "type": "string",
+            "description": "Your free Groq API key to power the ultra-fast generation engine. This key is **never saved** and is securely injected only during execution.",
+            "isSecret": true,
+            "editor": "textfield"
+        }
+    },
+    "required": [
+        "description",
+        "groq_api_key"
+    ]
+}
