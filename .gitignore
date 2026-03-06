@@ -69,3 +69,11 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 old session/
+
+# Node & Apify
+node_modules/
+dist/
+build/
+.actor/storage/
+actor/storage/
+storage/
