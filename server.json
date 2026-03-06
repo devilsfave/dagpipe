@@ -1,0 +1,34 @@
+{
+    "name": "dagpipe-generator",
+    "version": "0.1.0",
+    "description": "Generate crash-proof Python LLM pipelines from plain English descriptions. Outputs deployable ZIP with crash recovery, schema validation, and cost routing via DagPipe.",
+    "author": "Herbert Yeboah",
+    "license": "MIT",
+    "homepage": "https://github.com/devilsfave/dagpipe",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/devilsfave/dagpipe"
+    },
+    "tags": [
+        "llm",
+        "pipeline",
+        "python",
+        "ai",
+        "workflow",
+        "groq",
+        "code-generation",
+        "automation"
+    ],
+    "tools": [
+        {
+            "name": "generate_pipeline",
+            "description": "Generate a complete crash-proof DagPipe Python workflow from a plain English description. Returns a downloadable ZIP."
+        }
+    ],
+    "transport": [
+        {
+            "type": "streamable-http",
+            "url": "https://herbert--dagpipe-generator-mcp.apify.actor/mcp"
+        }
+    ]
+}

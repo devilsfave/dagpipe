@@ -4,8 +4,26 @@ from mcp.server.fastmcp import FastMCP
 from groq import Groq
 from dagpipe.generator.pipeline_generator import run_generator
 
+from starlette.responses import JSONResponse
+
 # Initialize FastMCP Server
 mcp = FastMCP("dagpipe-generator", description="DagPipe Generator — Translates plain English into a robust, crash-proof DagPipe Python workflow.", stateless_http=True, json_response=True)
+
+@mcp.tool()
+async def mcp_config(request):
+    return JSONResponse({
+        "schema": {
+            "type": "object", 
+            "properties": {
+                "groqApiKey": {
+                    "type": "string",
+                    "title": "Groq API Key",
+                    "description": "Get free key at console.groq.com/keys"
+                }
+            },
+            "required": ["groqApiKey"]
+        }
+    })
 
 @mcp.tool()
 def generate_pipeline(description: str) -> dict:

@@ -1,0 +1,15 @@
+{
+    "name": "DagPipe Pipeline Generator",
+    "description": "Generate crash-proof Python LLM pipelines from plain English. Outputs production-ready ZIP with crash recovery, schema validation, and intelligent cost routing.",
+    "license": "MIT",
+    "categories": [
+        "code-generation",
+        "ai",
+        "automation",
+        "llm"
+    ],
+    "links": {
+        "apify": "https://apify.com/gastronomic_desk/pipeline-generator",
+        "smithery": "https://smithery.ai/server/dagpipe-generator"
+    }
+}

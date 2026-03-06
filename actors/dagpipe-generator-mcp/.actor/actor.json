@@ -1,0 +1,13 @@
+{
+    "actorSpecification": 1,
+    "name": "dagpipe-generator-mcp",
+    "title": "DagPipe Generator MCP Server (Standby)",
+    "description": "Public MCP server for DagPipe Generator. Connect your AI agent directly.",
+    "version": "0.1",
+    "dockerfile": "./Dockerfile",
+    "standby": {
+        "desiredRequestsPerRun": 10,
+        "maxRequestsPerRun": 20,
+        "idleTimeoutSecs": 60
+    }
+}
