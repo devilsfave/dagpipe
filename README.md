@@ -24,13 +24,22 @@
 
 ---
 
-## 🚀 The Star: Pipeline Generator (Apify Actor)
+## Two Ways to Use DagPipe
 
-Don't want to write code? **Generate entire DagPipe workflows instantly.**
+**For developers** — Install the library and build crash-proof 
+LLM pipelines in Python:
+```bash
+pip install dagpipe-core
+```
 
-We deployed a fully managed AI agent that translates plain English into production-ready DagPipe codebases. It automatically handles the routing, schema design, and topological sorting for you. 
+**For everyone** — Describe your workflow in plain English. 
+Receive production-ready, crash-proof pipeline code as a 
+downloadable zip. No coding required:
+[👉 Pipeline Generator on Apify ($0.05/run)](https://apify.com/gastronomic_desk/pipeline-generator)
 
-[👉 **Run Pipeline Generator on Apify ($0.05/run)**](https://apify.com/gastronomic_desk/pipeline-generator)
+> The generator outputs DagPipe pipelines — so every generated 
+> zip is already wired with crash recovery, schema validation, 
+> and cost routing from the library above.
 
 ---
 
@@ -58,12 +67,9 @@ It turns any multi-step LLM workflow into a resilient, checkpointed DAG that rou
 
 ---
 
-## ⚙️ Installation
+## ⚙️ Requirements
 
-```bash
-pip install dagpipe-core
-```
-> **Requirements:** Python 3.12+ · `pydantic >= 2.0` · `pyyaml`
+> Python 3.12+ · `pydantic >= 2.0` · `pyyaml`
 
 ---
 
@@ -71,7 +77,7 @@ pip install dagpipe-core
 
 ```python
 from pathlib import Path
-from dagpipe.dag import PipelineOrchestrator, DAGNode
+from dagpipe.dag import PipelineOrchestrator, DAGNode, FilesystemCheckpoint
 from dagpipe.router import ModelRouter
 from dagpipe.constrained import constrained_generate
 
@@ -144,7 +150,9 @@ orchestrator = PipelineOrchestrator(
         "publish":     publish,
     },
     router=router,
-    checkpoint_dir=Path(".dagpipe/checkpoints"),
+    checkpoint_backend=FilesystemCheckpoint(
+        Path(".dagpipe/checkpoints")
+    ),
     max_retries=3,
     on_node_complete=lambda node_id, result, duration:
         print(f"  ✓ {node_id} ({duration:.1f}s)"),
@@ -206,15 +214,7 @@ Even if nodes are topologically independent, the orchestrator executes them one-
 
 ## 🤖 AEO-Native by Design
 
-**Agent Engine Optimization (AEO)** is the emerging discipline of building tools that AI agents can discover and execute autonomously — no human prompt engineering required.
-
-DagPipe is designed for AEO by architecture:
-
-- Every actor exposes `input_schema.json` and `output_schema.json` in machine-readable format
-- Every pipeline node declares its complexity score, dependencies, and output contract before execution
-- Any AI agent connected to the Apify MCP server — Claude Desktop, Cursor, VS Code — can discover and run DagPipe actors without human configuration
-
-When AI agents go shopping for tools, DagPipe is what they can actually use.
+Every actor exposes machine-readable `input_schema.json` and `output_schema.json` — making DagPipe tools discoverable and executable by AI agents without human configuration.
 
 ## 📦 Core Modules
 
@@ -236,23 +236,16 @@ Saves node output to disk after every successful execution. On resume, completed
 
 > **New in v0.1.0:** The `CheckpointStorage` Protocol. 
 
-You must pass a backend explicitly to the Orchestrator via `checkpoint_backend`. `FilesystemCheckpoint` is provided out of the box, but you can build custom backends (Redis, S3, Memory) by implementing the protocol:
+`FilesystemCheckpoint` is used by default. To use a custom backend (Redis, S3, in-memory), implement the protocol:
 
 ```python
 from dagpipe.dag import CheckpointStorage
 
 class RedisCheckpoint(CheckpointStorage):
-    def save(self, node_id: str, data: dict) -> None:
-        redis_client.set(node_id, json.dumps(data))
-    
-    def load(self, node_id: str) -> dict | None:
-        return json.loads(redis_client.get(node_id) or "null")
-        
-    def exists(self, node_id: str) -> bool:
-        return redis_client.exists(node_id) > 0
-        
-    def clear(self) -> None:
-        redis_client.flushdb()
+    def save(self, id: str, data: dict): redis_client.set(id, json.dumps(data))
+    def load(self, id: str): return json.loads(redis_client.get(id) or "null")
+    def exists(self, id: str): return redis_client.exists(id) > 0
+    def clear(self): redis_client.flushdb()
 ```
 *(Note: Passing `checkpoint_dir` directly to the Orchestrator is deprecated).*
 
@@ -304,33 +297,17 @@ nodes:
   - id: research
     fn: research_fn
     complexity: 0.4
-    description: "Gather source material"
-
   - id: summarize
     fn: summarize_fn
     depends_on: [research]
     complexity: 0.5
-    description: "Compress to key points"
-
   - id: publish
     fn: publish_fn
     depends_on: [summarize]
-    complexity: 0.0
     is_deterministic: true
-    description: "Push to CMS — no LLM needed"
 ```
 
----
 
-##  Use Cases
-
-- **Content pipelines** — Research → draft → edit → publish with zero loss on failure
-- **Code generation** — Spec → scaffold → implement → test across free models
-- **Data extraction** — Fetch → parse → validate → store with schema enforcement
-- **API integrations** — Multi-step workflows where any step can fail and retry
-- **Automated reporting** — Collect → analyze → format → deliver on a schedule
-
----
 
 ##  The Zero-Cost Stack
 
@@ -351,7 +328,7 @@ Wire any of these as your `low_complexity_fn`, `high_complexity_fn`, or `fallbac
 ## ❓ FAQ & Architecture Decisions
 
 **Why not just use LangChain or LangGraph?**
-LangGraph is powerful but comes with a massive latency and complexity tax. DagPipe is intentionally stripped down. It’s strictly a DAG executor with disk-based checkpointing and Pydantic validation. The goal was zero bloated abstractions,just pure Python callables solving the "crash and restart" problem for long-running batch jobs.
+The key difference: DagPipe includes a self-referential generator that produces entire pipelines from plain English — something LangGraph does not offer. Beyond that, LangGraph is powerful but comes with a massive latency and complexity tax. DagPipe is intentionally stripped down. It’s strictly a DAG executor with disk-based checkpointing and Pydantic validation. The goal was zero bloated abstractions, just pure Python callables solving the "crash and restart" problem for long-running batch jobs.
 
 **How does it route without using an LLM?**
 Using an LLM to route an LLM is too expensive. The router uses pure Python heuristics (keyword matching, token thresholds) to estimate cognitive complexity. If the task scores below your threshold, it routes to your `low_complexity_fn` (like a local 8B model). Above it, it hits your `high_complexity_fn`.
@@ -399,11 +376,7 @@ Phase 4 — Auto-Migrator        ░░░░░░░░░░░░░░░�
 
 ---
 
-## 🤝 Contributing
 
-Issues and PRs welcome. Please read the contribution guidelines before submitting.
-
----
 
 ## 📄 License
 
