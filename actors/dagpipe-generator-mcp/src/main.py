@@ -10,6 +10,9 @@ from dagpipe.generator.pipeline_generator import run_generator
 from pathlib import Path
 
 # ── Configuration ────────────────────────────────────────────────────────────
+# Ensure FastMCP runs in stateless mode for Apify Standby (compatible with fastmcp>=1.0.0)
+os.environ["FASTMCP_STATELESS_HTTP"] = "true"
+
 # Apify Standby settings
 HOST = '0.0.0.0'
 PORT = int(os.environ.get('ACTOR_WEB_SERVER_PORT') or os.environ.get('APIFY_CONTAINER_PORT') or 5001)
@@ -19,7 +22,6 @@ SESSION_TIMEOUT_SECS = 300
 mcp = FastMCP(
     "dagpipe-generator", 
     description="DagPipe Generator — Translates plain English into a robust, crash-proof DagPipe Python workflow.",
-    stateless_http=True,
     json_response=True
 )
 
