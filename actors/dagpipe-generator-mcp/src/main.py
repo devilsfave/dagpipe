@@ -19,7 +19,23 @@ mcp = FastMCP(
     instructions="DagPipe Generator — plain English to crash-proof pipeline."
 )
 
-@mcp.tool()
+@mcp.prompt()
+def example_pipeline_prompt() -> str:
+    """Example prompt showing how to use the pipeline generator."""
+    return (
+        "Generate a pipeline that fetches a blog post URL, "
+        "summarizes it using an LLM, translates the summary "
+        "to Spanish, and saves the result to a JSON file."
+    )
+
+@mcp.tool(
+    annotations={
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": False,
+        "openWorldHint": True
+    }
+)
 def generate_pipeline(description: str) -> dict:
     """Generate a complete crash-proof DagPipe workflow from plain English."""
     api_key = os.environ.get("GROQ_API_KEY")

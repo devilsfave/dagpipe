@@ -13,6 +13,8 @@
   <img src="https://img.shields.io/badge/python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/license-MIT-0d1117?style=flat-square&color=00d9ff" alt="License" />
   <img src="https://img.shields.io/badge/version-0.1.0-FF4500?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/MCP-Live-00d9ff?style=flat-square" alt="MCP" />
+  <img src="https://img.shields.io/badge/Smithery-Listed-FF4500?style=flat-square" alt="Smithery" />
   <a href="https://www.bestpractices.dev/projects/12089"><img src="https://www.bestpractices.dev/projects/12089/badge" alt="OpenSSF Best Practices" /></a>
 </p>
 
@@ -49,16 +51,82 @@ It turns any multi-step LLM workflow into a resilient, checkpointed DAG that rou
 
 ---
 
-## Two Ways to Use DagPipe
+## Three Ways to Use DagPipe
 
 **For developers** — Install the library and build crash-proof LLM pipelines in Python:
 ```bash
 pip install dagpipe-core
 ```
 
-**For everyone** — Describe your workflow in plain English. Receive production-ready, crash-proof pipeline code as a downloadable zip. No coding required: [👉 Pipeline Generator on Apify ($0.05/run)](https://apify.com/gastronomic_desk/pipeline-generator)
+**For non-coders** — Describe your workflow in plain English. Receive production-ready, crash-proof pipeline code as a downloadable zip. No coding required: [👉 Pipeline Generator on Apify ($0.05/run)](https://apify.com/gastronomic_desk/pipeline-generator)
+
+**For AI agents and IDE users** — Connect directly via MCP (Model Context Protocol). Use DagPipe from Claude Desktop, Cursor, Windsurf, or any MCP-compatible client without writing any code: [👉 DagPipe Generator MCP on Smithery](https://smithery.ai/server/gastronomic-desk/dagpipe-generator)
 
 > The generator outputs DagPipe pipelines — so every generated zip is already wired with crash recovery, schema validation, and cost routing from the library above.
+
+---
+
+## 🔌 MCP Server
+
+DagPipe exposes a live MCP server that lets any MCP-compatible AI client generate crash-proof pipelines through natural language — no API calls, no setup beyond one config line.
+
+**Live endpoint:**
+```
+https://gastronomic-desk--dagpipe-generator-mcp.apify.actor/mcp
+```
+
+**Listed on Smithery:**
+https://smithery.ai/server/gastronomic-desk/dagpipe-generator
+
+### Available Tools
+
+| Tool | Description |
+|---|---|
+| `generate_pipeline` | Generates a complete crash-proof DagPipe workflow ZIP from a plain English description |
+
+### Connect via Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "dagpipe-generator": {
+      "url": "https://gastronomic-desk--dagpipe-generator-mcp.apify.actor/mcp?groqApiKey=YOUR_GROQ_KEY",
+      "transport": "streamable-http"
+    }
+  }
+}
+```
+
+### Connect via Cursor / Windsurf
+
+Add to your MCP settings:
+
+```json
+{
+  "dagpipe-generator": {
+    "url": "https://gastronomic-desk--dagpipe-generator-mcp.apify.actor/mcp?groqApiKey=YOUR_GROQ_KEY",
+    "transport": "streamable-http"
+  }
+}
+```
+
+> Get your free Groq API key at console.groq.com/keys — takes 2 minutes, no credit card required.
+
+### Run Locally (stdio transport)
+
+For local use with Cursor/Windsurf without Apify:
+
+```bash
+git clone https://github.com/devilsfave/dagpipe
+cd dagpipe
+pip install -r servers/dagpipe-generator/requirements.txt
+export GROQ_API_KEY=your_key_here
+python servers/dagpipe-generator/server.py
+```
+
+Then point your MCP client to the local server using stdio transport.
 
 ---
 
@@ -334,6 +402,9 @@ The `PipelineOrchestrator` respects the `max_retries` parameter. If a node exhau
 **Does this support parallel/async execution?**
 Currently, `v0.1.0` executes the topological sort sequentially. Full `asyncio` support for concurrent execution of independent nodes is on the roadmap for the next major release. The immediate focus of this version is entirely on crash resilience and state persistence.
 
+**How do I use DagPipe from Claude Desktop or Cursor?**
+Install the MCP server from Smithery at smithery.ai/server/gastronomic-desk/dagpipe-generator. You will need a free Groq API key from console.groq.com/keys. Once connected, type "Generate a pipeline that does X" directly in your AI chat and receive a deployable ZIP in seconds.
+
 ---
 
 ## 🛒 Templates
@@ -342,6 +413,7 @@ Ready-to-run pipeline packages built on DagPipe. Download, drop in your API key,
 
 | Template | Description | Link |
 |---|---|---|
+| **DagPipe Generator MCP** | 🔌 **MCP server — connect from any AI IDE** | [Smithery →](https://smithery.ai/server/gastronomic-desk/dagpipe-generator) |
 | **Content Pipeline** | Research → draft → edit → SEO-optimize blog posts using Groq's free tier | [Get it →](https://dagpipe.lemonsqueezy.com/checkout/buy/8877121e-5ad7-415f-b3e0-192b583ebfcd) |
 
 ### 🎭 Apify Actors
@@ -363,7 +435,7 @@ More templates coming soon. Have a use case? [Open an issue.](https://github.com
 ```
 Phase 1 — Core Library         ████████████████████  COMPLETE
 Phase 2 — PyPI + Templates     ████████████████████  COMPLETE  
-Phase 3 — Actors + MCP         ████████████████░░░░  IN PROGRESS
+Phase 3 — Actors + MCP         ████████████████████  COMPLETE
 Phase 4 — Auto-Migrator        ░░░░░░░░░░░░░░░░░░░░  UPCOMING
 ```
 
