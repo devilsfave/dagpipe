@@ -38,7 +38,7 @@ startCommand:
         title: "Debug Mode"
         description: "Enable verbose logging"
         default: false
-    exampleConfig:
-      groqApiKey: "gsk_example1234567890abcdef"
-      groqModel: "llama-3.3-70b-versatile"
-      debugMode: false
+  exampleConfig:
+    groqApiKey: "gsk_example1234567890abcdef"
+    groqModel: "llama-3.3-70b-versatile"
+    debugMode: false
