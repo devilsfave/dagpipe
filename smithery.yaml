@@ -12,12 +12,33 @@ tags:
   - ai-automation
   - mcp
   - dagpipe
-configSchema:
-  type: object
-  properties:
-    groqApiKey:
-      type: string
-      description: "Your Groq API key from console.groq.com/keys"
-      title: "Groq API Key"
-  required:
-    - groqApiKey
+startCommand:
+  type: http
+  configSchema:
+    type: object
+    required:
+      - groqApiKey
+    properties:
+      groqApiKey:
+        type: string
+        title: "Groq API Key"
+        description: "Your Groq API key from console.groq.com/keys"
+      groqModel:
+        type: string
+        title: "Groq Model"
+        description: "Groq model to use for generation"
+        default: "llama-3.3-70b-versatile"
+        enum:
+          - "llama-3.3-70b-versatile"
+          - "llama-3.1-8b-instant"
+          - "mixtral-8x7b-32768"
+          - "gemma2-9b-it"
+      debugMode:
+        type: boolean
+        title: "Debug Mode"
+        description: "Enable verbose logging"
+        default: false
+    exampleConfig:
+      groqApiKey: "gsk_example1234567890abcdef"
+      groqModel: "llama-3.3-70b-versatile"
+      debugMode: false
