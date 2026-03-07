@@ -1,7 +1,7 @@
 name: dagpipe-generator
 description: "Generate crash-proof Python LLM pipelines from plain English. DagPipe reliability layer — crash recovery, schema validation, cost routing. Powered by Groq & LLaMA-3."
 type: remote
-url: https://gastronomic_desk--dagpipe-generator-mcp.apify.actor/mcp
+url: https://gastronomic-desk--dagpipe-generator-mcp.apify.actor/mcp
 tags:
   - pipeline
   - llm

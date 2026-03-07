@@ -1,5 +1,5 @@
 apify>=2.0.0
-fastmcp>=2.0.0
+fastmcp==2.14.2
 mcp[cli]>=1.0.0
 groq>=0.9.0
 pydantic>=2.0.0
