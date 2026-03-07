@@ -1,0 +1,18 @@
+{
+    "title": "DagPipe Generator MCP Server",
+    "description": "This is an MCP Server designed to run in Standby Mode. It translates plain English into a robust, crash-proof DagPipe Python workflow.",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "groqApiKey": {
+            "title": "Groq API Key (Secure)",
+            "type": "string",
+            "description": "Your free Groq API key to power the ultra-fast generation engine. Securely injected during execution.",
+            "isSecret": true,
+            "editor": "textfield"
+        }
+    },
+    "required": [
+        "groqApiKey"
+    ]
+}

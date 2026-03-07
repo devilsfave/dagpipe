@@ -1,0 +1,7 @@
+{
+    "actorOutputSchemaVersion": 1,
+    "title": "MCP Server Output",
+    "description": "This Actor runs as an MCP server in Standby mode and does not generate standard dataset outputs.",
+    "type": "object",
+    "properties": {}
+}

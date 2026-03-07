@@ -28,7 +28,7 @@
     "transport": [
         {
             "type": "streamable-http",
-            "url": "https://herbert--dagpipe-generator-mcp.apify.actor/mcp"
+            "url": "https://gastronomic_desk--dagpipe-generator-mcp.apify.actor/mcp"
         }
     ]
 }

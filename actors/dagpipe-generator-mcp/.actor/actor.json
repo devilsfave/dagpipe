@@ -5,6 +5,13 @@
     "description": "Public MCP server for DagPipe Generator. Connect your AI agent directly.",
     "version": "0.1",
     "dockerfile": "./Dockerfile",
+    "input": "./input_schema.json",
+    "output": "./output_schema.json",
+    "categories": [
+        "AI",
+        "Developer tools",
+        "Automation"
+    ],
     "standby": {
         "desiredRequestsPerRun": 10,
         "maxRequestsPerRun": 20,
