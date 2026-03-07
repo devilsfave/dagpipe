@@ -62,7 +62,7 @@ pip install dagpipe-core
 
 **For AI agents and IDE users** — Connect directly via MCP (Model Context Protocol). Use DagPipe from Claude Desktop, Cursor, Windsurf, or any MCP-compatible client without writing any code: [👉 DagPipe Generator MCP on Smithery](https://smithery.ai/server/gastronomic-desk/dagpipe-generator)
 
-> The generator outputs DagPipe pipelines — so every generated zip is already wired with crash recovery, schema validation, and cost routing from the library above.
+> No other LLM pipeline framework ships a built-in generator that produces crash-proof, checkpointed, cost-routed pipeline code from a plain English description. You can ask any coding assistant to generate a pipeline. Only DagPipe's generator outputs code that already has checkpoint recovery, free-tier routing, and Pydantic validation built in by default.
 
 ---
 
@@ -384,14 +384,36 @@ DagPipe is designed to run entirely on free tiers:
 | Modal | Any 7B model | $30/month free credits (Starter plan) |
 | Ollama | Any model | Local, unlimited |
 
+Groq has a generous free tier with Llama 3.3 70B and Llama 3.1 8B. Gemini has a free tier with Gemini 2.5 Flash and 2.5 Flash-Lite — note that Gemini 2.0 Flash was retired March 3, 2026, so any code referencing that model string will break.
+
 Wire any of these as your `low_complexity_fn`, `high_complexity_fn`, or `fallback_fn`. DagPipe is provider-agnostic.
 
 ---
 
 ## ❓ FAQ & Architecture Decisions
 
+<details>
+<summary><b>Click to expand Frequently Asked Questions</b></summary>
+
 **Why not just use LangChain or LangGraph?**
-The key difference: DagPipe includes a self-referential generator that produces entire pipelines from plain English — something LangGraph does not offer. Beyond that, LangGraph is powerful but comes with a massive latency and complexity tax. DagPipe is intentionally stripped down. It’s strictly a DAG executor with disk-based checkpointing and Pydantic validation. The goal was zero bloated abstractions, just pure Python callables solving the "crash and restart" problem for long-running batch jobs.
+The key difference: DagPipe includes a self-referential generator that produces entire pipelines from plain English — something LangGraph does not offer natively. 
+
+While LangGraph has checkpointing, it is tightly coupled to their `TypedDict` state system and graph compilation model; you must adopt the full framework to get it. DagPipe's checkpoints are plain JSON files on disk, readable with any text editor, with zero framework lock-in. DagPipe is intentionally stripped down — it’s strictly a DAG executor with disk-based checkpointing and Pydantic validation, solving the "crash and restart" problem without a massive latency and complexity tax.
+
+**Why not just wrap my pipeline in a try/except and restart manually?**
+A `try/except` tells you something failed, but it doesn't save the work that succeeded before the crash. DagPipe's checkpointing saves the output of every completed node to disk *before* moving to the next one. When you restart, nodes 1 through 6 are skipped automatically. You only re-run the failed node. 
+
+**How is DagPipe's checkpointing different from LangGraph's?**
+LangGraph's checkpointing requires a `StateGraph`, `TypedDict` schemas, and a compiled checkpointer object. You're adopting the full framework architecture. DagPipe's checkpoints are just JSON files. You can open them in a text editor, copy them, or inspect them without any framework code required.
+
+**Can I use this with OpenAI / Anthropic / any other provider?**
+Yes. Any Python function that takes a list of messages and returns a string works as a model. Whether it's `genai`, `openai`, `anthropic`, or a local `Ollama` call — if it's a Python callable, DagPipe can route to it.
+
+**Does DagPipe store my checkpoint data anywhere online?**
+No. Checkpoints are plain JSON files written to a local directory (default: `.dagpipe/checkpoints/`). Nothing leaves your environment. For cloud storage, you can implement the `CheckpointStorage` protocol with Redis or S3.
+
+**Does the router work without any configuration?**
+Yes. Out of the box, the router uses keyword heuristics and token count thresholds to estimate complexity. It works for most standard tasks. You simply set a `complexity` score (0.0 to 1.0) on your nodes, and the router handles the rest.
 
 **How does it route without using an LLM?**
 Using an LLM to route an LLM is too expensive. The router uses pure Python heuristics (keyword matching, token thresholds) to estimate cognitive complexity. If the task scores below your threshold, it routes to your `low_complexity_fn` (like a local 8B model). Above it, it hits your `high_complexity_fn`.
@@ -400,10 +422,12 @@ Using an LLM to route an LLM is too expensive. The router uses pure Python heuri
 The `PipelineOrchestrator` respects the `max_retries` parameter. If a node exhausts its retry budget (e.g., the model keeps failing to return valid JSON despite error feedback), DagPipe halts and raises a `RuntimeError`. Because of the checkpointing, you can adjust the prompt or the schema and restart without losing previous work.
 
 **Does this support parallel/async execution?**
-Currently, `v0.1.0` executes the topological sort sequentially. Full `asyncio` support for concurrent execution of independent nodes is on the roadmap for the next major release. The immediate focus of this version is entirely on crash resilience and state persistence.
+Currently, `v0.1.x` executes the topological sort sequentially. Full `asyncio` support for concurrent execution of independent nodes is on the roadmap for `v0.2.0`. The immediate focus is maximum crash resilience.
 
 **How do I use DagPipe from Claude Desktop or Cursor?**
-Install the MCP server from Smithery at smithery.ai/server/gastronomic-desk/dagpipe-generator. You will need a free Groq API key from console.groq.com/keys. Once connected, type "Generate a pipeline that does X" directly in your AI chat and receive a deployable ZIP in seconds.
+Install the MCP server from Smithery at [smithery.ai/server/gastronomic-desk/dagpipe-generator](https://smithery.ai/server/gastronomic-desk/dagpipe-generator). Once connected, type "Generate a pipeline that does X" in your AI chat and receive a deployable ZIP in seconds.
+
+</details>
 
 ---
 
