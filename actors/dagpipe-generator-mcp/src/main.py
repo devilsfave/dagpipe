@@ -12,6 +12,7 @@ from pathlib import Path
 # ── Configuration ────────────────────────────────────────────────────────────
 # Ensure FastMCP runs in stateless mode for Apify Standby (compatible with fastmcp>=1.0.0)
 os.environ["FASTMCP_STATELESS_HTTP"] = "true"
+os.environ["FASTMCP_JSON_RESPONSE"] = "true"
 
 # Apify Standby settings
 HOST = '0.0.0.0'
@@ -21,8 +22,7 @@ SESSION_TIMEOUT_SECS = 300
 # ── MCP Logic ────────────────────────────────────────────────────────────────
 mcp = FastMCP(
     "dagpipe-generator", 
-    description="DagPipe Generator — Translates plain English into a robust, crash-proof DagPipe Python workflow.",
-    json_response=True
+    description="DagPipe Generator — Translates plain English into a robust, crash-proof DagPipe Python workflow."
 )
 
 @mcp.tool()
