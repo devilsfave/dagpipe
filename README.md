@@ -1,24 +1,77 @@
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:161b22,100:00d9ff&height=120&section=header"/>
+# DagPipe — The Crash-Proof LLM Pipeline Engine
 
-<div align="center">
-  
-<img src="assets/logo.png" alt="DagPipe Logo" width="160" />
+> NeurIPS 2025 research analyzing **1,642 real-world multi-agent execution traces**
+> found a **41–86.7% failure rate** across 7 state-of-the-art open-source systems.
+> The root cause: cascading error propagation — one failed node corrupts all downstream nodes.
+>
+> **DagPipe makes cascade failure structurally impossible.**
 
-# DagPipe
+Every node's output is independently validated and checkpointed before the next node executes.
+A failure at node 4 cannot corrupt nodes 1, 2, or 3. Delete nothing. Just re-run.
+DagPipe resumes exactly where it stopped — automatically.
 
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600=20&duration=3000&pause=1000&color=00D9FF&center=true&vCenter=true&multiline=true&repeat=true&width=600&height=80&lines=Zero-cost,+crash-proof+LLM+orchestration;Route+tasks+safely+to+free-tier+models;Never+lose+progress+mid-pipeline)](https://git.io/typing-svg)
+```
+Pipeline: research → outline → draft → edit → publish
+                                  ↑
+                            crashed here
+                            
+Re-run → research ✓ (restored) → outline ✓ (restored) → draft (re-runs) → ...
+```
 
-<p>
-  <img src="https://img.shields.io/badge/tests-59%20passing-00d9ff?style=flat-square" alt="Tests" />
-  <img src="https://img.shields.io/badge/python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/license-MIT-0d1117?style=flat-square&color=00d9ff" alt="License" />
-  <img src="https://img.shields.io/badge/version-0.1.0-FF4500?style=flat-square" alt="Version" />
-  <img src="https://img.shields.io/badge/MCP-Live-00d9ff?style=flat-square" alt="MCP" />
-  <img src="https://img.shields.io/badge/Smithery-Listed-FF4500?style=flat-square" alt="Smithery" />
-  <a href="https://www.bestpractices.dev/projects/12089"><img src="https://www.bestpractices.dev/projects/12089/badge" alt="OpenSSF Best Practices" /></a>
-</p>
+**Zero infrastructure. Zero subscription. Runs entirely on Groq's free tier.**
 
-</div>
+---
+
+## Why DagPipe Exists
+
+Every LLM orchestrator in 2025 has the same fatal flaw: when a node fails, the entire
+pipeline fails. You lose everything. You restart from zero. You burn API credits re-running
+work that already succeeded.
+
+DagPipe solves this with one rule: **a node's output is checkpointed the moment it succeeds.**
+The execution graph is a static YAML file — no LLM can modify it at runtime. This makes
+DagPipe pipelines auditable, reproducible, and safe to run on sensitive data.
+
+---
+
+## Security Architecture
+
+### Static Execution Graph
+DagPipe pipelines cannot self-modify. The graph is declared in YAML before runtime.
+No LLM call can add, remove, or reorder nodes. This is what makes DagPipe safe to run
+on sensitive data — unlike agent frameworks where the LLM decides what executes next.
+
+### Semantic Output Contracts (v0.2+)
+Beyond schema validation, nodes can declare semantic assertions:
+```python
+DAGNode(
+    id="revenue",
+    fn_name="calculate_revenue",
+    assert_fn=lambda out: 0 < out.get("revenue", 0) < 1e12,
+    assert_message="Revenue must be a realistic positive number",
+)
+```
+If the LLM returns structurally valid but semantically wrong data, the assertion catches it,
+injects the failure context into the retry prompt, and forces self-correction.
+
+### Context Isolation (v0.2+)
+Nodes only receive outputs from their declared dependencies. A node processing untrusted
+web data cannot access API keys, credentials, or outputs from unrelated pipeline branches.
+
+### Dead Letter Queue (v0.2+)
+When a node fails after all retries, DagPipe saves the full failure context to
+`.dagpipe/checkpoints/{node_id}.failed.json` — including the context passed to the node,
+the last error, and instructions for manual correction. No failure context is ever lost.
+
+---
+
+## Install
+
+```bash
+pip install dagpipe-core
+```
+
+**Requirements:** Python 3.12+, a free [Groq](https://console.groq.com) account
 
 ---
 

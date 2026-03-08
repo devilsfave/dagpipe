@@ -47,6 +47,9 @@ AGENTS.md
 BLUEPRINT.md
 HANDOFF.md
 PROJECT_STATUS.md
+AGENT_PRIMER.md
+LATEST_V2_FILES/
+src/dagpipe/_v1_backup/
 
 # Internal session / AI council documents (never push to public repo)
 DISCUSSION.md

@@ -1,0 +1,119 @@
+# DagPipe
+
+> DagPipe is a crash-proof, zero-cost LLM pipeline execution engine for Python.
+> It runs directed acyclic graphs (DAGs) of LLM-backed functions with automatic
+> checkpointing, model routing, structured output validation, and dead letter queuing.
+> Built for free-tier APIs (Groq, Gemini, Ollama). No cloud infrastructure required.
+
+## Install
+pip install dagpipe-core
+
+## Core Concepts
+
+- **DAGNode**: A single pipeline step with id, fn_name, depends_on, complexity, is_deterministic, assert_fn
+- **PipelineOrchestrator**: Executes the DAG in dependency order with checkpointing, retry, routing
+- **ModelRouter**: Routes each node to the cheapest LLM that can handle its complexity score
+- **constrained_generate**: Wraps any LLM call with Pydantic schema validation and auto-retry (5-strategy JSON extractor)
+- **FilesystemCheckpoint**: Saves each node's output to disk; re-run from last success on failure
+- **Dead Letter Queue**: Failed nodes write .failed.json with full debug context
+- **assert_fn**: Semantic contracts on node output — catches schema-valid hallucinations
+
+## Minimal Example
+
+```python
+from groq import Groq
+from dagpipe.dag import PipelineOrchestrator, DAGNode
+from dagpipe.router import ModelRouter
+from typing import Any
+
+client = Groq(api_key="your-groq-key")
+
+def llm_call(messages, model_name="llama-3.1-8b-instant"):
+    response = client.chat.completions.create(
+        model=model_name, messages=messages, max_tokens=1024
+    )
+    return response.choices[0].message.content
+
+def llama_8b(messages): return llm_call(messages, "llama-3.1-8b-instant")
+def llama_70b(messages): return llm_call(messages, "llama-3.3-70b-versatile")
+
+router = ModelRouter(
+    low_complexity_fn=llama_8b,
+    high_complexity_fn=llama_70b,
+    fallback_fn=llama_8b,
+    rpm_limit=30,
+)
+
+def research(context: dict, model=None) -> dict:
+    topic = context.get("topic", "AI")
+    result = model([{"role": "user", "content": f"Research: {topic}"}]) if model else "mock"
+    return {"findings": result}
+
+def draft(context: dict, model=None) -> dict:
+    findings = context["research"]["findings"]
+    result = model([{"role": "user", "content": f"Write article from: {findings}"}]) if model else "mock"
+    return {"article": result}
+
+nodes = [
+    DAGNode(id="research", fn_name="research", complexity=0.3),
+    DAGNode(id="draft", fn_name="draft", depends_on=["research"], complexity=0.8),
+]
+registry = {"research": research, "draft": draft}
+
+orch = PipelineOrchestrator(nodes=nodes, node_registry=registry, router=router)
+state, run = orch.run(initial_state={"topic": "AI Agents"})
+print(state["draft"]["article"])
+print(f"Cost: ${run.estimated_total_cost_usd:.4f}")
+```
+
+## YAML Pipeline Format
+
+```yaml
+nodes:
+  - id: research
+    fn: research
+    depends_on: []
+    complexity: 0.3
+    is_deterministic: false
+    description: "Research the topic"
+  - id: draft
+    fn: draft
+    depends_on: [research]
+    complexity: 0.8
+    description: "Write the article"
+```
+
+## V2 Safety Features
+
+```python
+# Semantic contracts — catch hallucinations
+DAGNode(
+    id="revenue",
+    fn_name="calc_revenue",
+    assert_fn=lambda out: 0 < out.get("revenue", 0) < 1e12,
+    assert_message="Revenue must be a realistic positive number",
+)
+
+# Secrets — never enter node context
+orch = PipelineOrchestrator(
+    nodes=nodes, node_registry=registry,
+    secrets={"API_KEY": "sk-..."},
+)
+
+# Context isolation — nodes only see declared dependencies
+orch = PipelineOrchestrator(
+    nodes=nodes, node_registry=registry,
+    isolate_context=True,
+)
+
+# Dead letter inspection
+from dagpipe.dag import inspect_failure, override_node
+failure = inspect_failure("revenue")
+override_node("revenue", {"revenue": 1_200_000})
+```
+
+## Optional Docs
+- https://github.com/devilsfave/dagpipe
+- https://github.com/devilsfave/dagpipe/blob/main/README.md
+- https://github.com/devilsfave/dagpipe/tree/main/templates
+- https://pypi.org/project/dagpipe-core/

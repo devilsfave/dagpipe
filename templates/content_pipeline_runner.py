@@ -16,7 +16,7 @@ from typing import Any
 
 from groq import Groq  # pip install groq
 
-from dagpipe.dag import load_dag, PipelineOrchestrator
+from dagpipe.dag import load_dag, PipelineOrchestrator, FilesystemCheckpoint
 from dagpipe.router import ModelRouter
 
 
@@ -252,7 +252,7 @@ def main() -> None:
         high_label="groq-70b",
         fallback_label="groq-8b-fallback",
         complexity_threshold=0.7,   # route to 70B when complexity >= 0.7
-        groq_rpm_limit=30,          # Groq free tier: 30 requests per minute
+        rpm_limit=30,               # Groq free tier: 30 requests per minute
     )
 
     # Resolve the YAML template path relative to this script
@@ -270,7 +270,7 @@ def main() -> None:
         nodes=template_path,            # Pass Path to auto-load YAML
         node_registry=registry,
         router=router,
-        checkpoint_dir=checkpoint_dir,
+        checkpoint_backend=FilesystemCheckpoint(checkpoint_dir),
         max_retries=3,                  # Retry failed nodes up to 3 times
         on_node_complete=on_complete,
     )

@@ -105,13 +105,13 @@ def local_llama3(messages):
     return response.choices[0].message.content
 ```
 
-### 3. Google Gemini (Flash)
+### Setup Google Gemini (Optional)
 ```python
 import google.generativeai as genai
 genai.configure(api_key="your-api-key")
-model = genai.GenerativeModel('gemini-2.0-flash')
+model = genai.GenerativeModel('gemini-2.5-flash')
 
-def gemini_flash(messages):
+def my_llm_call(messages: list[dict], **kwargs) -> str:
     # Convert standard OpenAI message format to Gemini format
     prompt = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
     response = model.generate_content(prompt)
