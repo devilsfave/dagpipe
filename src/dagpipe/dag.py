@@ -56,6 +56,7 @@ from .checkpoints import (
     clear_checkpoints,
     restore,
 )
+from .registry import ModelRegistry
 from .router import ModelRouter
 
 
@@ -416,6 +417,7 @@ class PipelineOrchestrator:
         circuit_breaker_threshold: int | None = None,
         strict_checkpoint: bool = False,
         token_pricing: dict[str, float] | None = None,
+        model_registry: ModelRegistry | None = None,
     ) -> None:
         if isinstance(nodes, Path):
             self._raw_nodes = load_dag(nodes)
@@ -434,6 +436,7 @@ class PipelineOrchestrator:
         self._circuit_threshold = circuit_breaker_threshold
         self._strict_checkpoint = strict_checkpoint
         self._token_pricing = token_pricing or _DEFAULT_TOKEN_PRICING_USD_PER_1K
+        self._model_registry = model_registry
 
         # Resolve checkpoint backend
         if checkpoint_backend is not None:
@@ -473,6 +476,10 @@ class PipelineOrchestrator:
                            NOT here — anything in initial_state enters node context.
             fresh: If True, clear all checkpoints before starting.
         """
+        # V2.1: Validate all configured models before starting
+        if self._model_registry is not None and self.router is not None:
+            self._validate_router_models()
+
         run = PipelineRun(
             pipeline_id=str(uuid4()),
             started_at=datetime.now(timezone.utc).isoformat(),
@@ -597,6 +604,15 @@ class PipelineOrchestrator:
         # Backward compat: always return the state dict
         # If caller unpacks two values they get (state, run)
         return _PipelineResult(self.state, run)
+
+    def _validate_router_models(self) -> None:
+        """Validate all models configured in the router against live registry."""
+        if hasattr(self.router, '_low_label') and self.router._low_label:
+            self._model_registry.validate_model(self.router._low_label)
+        if hasattr(self.router, '_high_label') and self.router._high_label:
+            self._model_registry.validate_model(self.router._high_label)
+        if hasattr(self.router, '_fallback_label') and self.router._fallback_label:
+            self._model_registry.validate_model(self.router._fallback_label)
 
     # ── Internal helpers ───────────────────────────────────────────────────
 
@@ -799,7 +815,11 @@ class PipelineOrchestrator:
     def _estimate_cost(self, model_label: str | None, tokens: int) -> float:
         if model_label is None or tokens == 0:
             return 0.0
-        rate = self._token_pricing.get(model_label, 0.0)
+        if self._model_registry is not None:
+            pricing = self._model_registry.get_pricing(model_label)
+            rate = pricing.get("input_per_1k", 0.0)
+        else:
+            rate = self._token_pricing.get(model_label, 0.0)
         return (tokens / 1000) * rate
 
 

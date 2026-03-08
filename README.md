@@ -1,5 +1,11 @@
 # DagPipe — The Crash-Proof LLM Pipeline Engine
 
+![Tests](https://github.com/devilsfave/dagpipe/actions/workflows/test.yml/badge.svg)
+![Security](https://github.com/devilsfave/dagpipe/actions/workflows/security.yml/badge.svg)
+![PyPI](https://img.shields.io/pypi/v/dagpipe-core)
+![Python](https://img.shields.io/pypi/pyversions/dagpipe-core)
+![License](https://img.shields.io/github/license/devilsfave/dagpipe)
+
 > NeurIPS 2025 research analyzing **1,642 real-world multi-agent execution traces**
 > found a **41–86.7% failure rate** across 7 state-of-the-art open-source systems.
 > The root cause: cascading error propagation — one failed node corrupts all downstream nodes.

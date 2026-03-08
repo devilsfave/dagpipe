@@ -26,8 +26,8 @@
 - **Technical Note:** Build 0.1.17 is the verified golden build using native FastMCP architecture.
 
 ### Automation & CI Tracking
-- **Status:** IN PROGRESS (Blocked at Phase 6 Model Registry)
-- **Outcome:** Installed Dependabot, multi-version test matrix, daily security pip-audit, staleness scanners, and router heuristic regression tests.
+- **Status:** COMPLETE
+- **Outcome:** Installed Dependabot, multi-version test matrix, daily security pip-audit, staleness scanners, and router heuristic regression tests. Added `promptfoo` model generator CI, Model Registry for retired model fallback, and link checkers.
 
 ---
 

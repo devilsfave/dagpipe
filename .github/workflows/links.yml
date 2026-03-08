@@ -1,0 +1,36 @@
+name: Link Check
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.md'
+  schedule:
+    # Weekly — external links rot over time
+    - cron: '0 8 * * 1'
+
+jobs:
+  linkcheck:
+    name: Check links in documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: |
+            --verbose
+            --no-progress
+            --exclude-mail
+            --exclude 'localhost'
+            --exclude 'pypistats.org'
+            --max-retries 3
+            README.md
+            docs/**/*.md
+            templates/**/*.md
+          fail: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

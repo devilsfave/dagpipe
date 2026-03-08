@@ -53,6 +53,10 @@ SKIP_PATHS = {
     "CHANGELOG.md",                # Changelog may reference old names historically
     "MIGRATION.md",                # Migration guide must reference old names
     "_v1_backup",                  # Skip legacy V1 files
+    "COUNCIL_LOG.md",              # Skip historical system log
+    "test_checkpoint_backend.py",  # Includes intentional deprecated args for tests
+    "DISCUSSION.md",               # Historical analysis
+    "INTELLIGENCE_BRIEF.md",       # Historical analysis
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

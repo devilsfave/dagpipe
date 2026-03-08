@@ -1,0 +1,54 @@
+description: "DagPipe generator prompt quality tests"
+
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config:
+      apiKey: ${GROQ_API_KEY}
+
+prompts:
+  - file://src/dagpipe/generator/pipeline_generator_prompt.txt
+
+tests:
+  - description: "Simple 2-node pipeline"
+    vars:
+      user_request: "Build a pipeline that researches a topic and writes a summary"
+    assert:
+      - type: python
+        value: |
+          # Check output contains required DagPipe elements
+          output_lower = output.lower()
+          assert "dagsnode" in output_lower or "dagnode" in output_lower, "Must use DAGNode"
+          assert "pipelineorchestrator" in output_lower, "Must use PipelineOrchestrator"
+          assert "checkpoint" in output_lower, "Must include checkpointing"
+          assert "depends_on" in output_lower, "Must have dependencies declared"
+          return True
+
+  - description: "Pipeline with model routing"
+    vars:
+      user_request: "Build a pipeline that classifies email intent and drafts a reply"
+    assert:
+      - type: python
+        value: |
+          assert "modelrouter" in output.lower() or "router" in output.lower(), "Must include ModelRouter"
+          assert "complexity" in output.lower(), "Must set complexity on nodes"
+          return True
+
+  - description: "Generator output is valid Python"
+    vars:
+      user_request: "Build a pipeline that extracts data from a URL and formats it as JSON"
+    assert:
+      - type: python
+        value: |
+          import ast
+          # Extract Python code blocks from output
+          import re
+          code_blocks = re.findall(r'```python\n(.*?)```', output, re.DOTALL)
+          if not code_blocks:
+            # Try to find Python code without fence
+            code_blocks = [output]
+          for block in code_blocks:
+            try:
+              ast.parse(block)
+            except SyntaxError as e:
+              raise AssertionError(f"Invalid Python syntax: {e}")
+          return True

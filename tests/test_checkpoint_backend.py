@@ -233,7 +233,7 @@ def test_deprecated_checkpoint_dir_emits_warning(tmp_path: Path) -> None:
         PipelineOrchestrator(
             nodes=nodes,
             node_registry=registry,
-            directory=tmp_path / "ckpt",
+            checkpoint_dir=tmp_path / "ckpt",
         )
 
     dep_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
@@ -252,7 +252,7 @@ def test_deprecated_checkpoint_dir_still_persists(tmp_path: Path) -> None:
         orch = PipelineOrchestrator(
             nodes=nodes,
             node_registry=registry,
-            directory=ckpt_dir,
+            checkpoint_dir=ckpt_dir,
         )
     orch.run()
 

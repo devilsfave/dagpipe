@@ -1,0 +1,75 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-7.4.3, pluggy-1.5.0 -- C:\Users\GASMILA\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.7', 'Platform': 'Windows-11-10.0.22621-SP0', 'Packages': {'pytest': '7.4.3', 'pluggy': '1.5.0'}, 'Plugins': {'anyio': '4.12.1', 'langsmith': '0.7.3', 'asyncio': '0.21.1', 'html': '4.0.2', 'metadata': '3.1.1', 'ordering': '0.6', 'rerunfailures': '15.0', 'xdist': '3.6.1', 'seleniumbase': '4.37.6'}, 'JAVA_HOME': 'C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.4.7-hotspot'}
+rootdir: C:\Users\GASMILA\dagpipe
+configfile: pyproject.toml
+plugins: anyio-4.12.1, langsmith-0.7.3, asyncio-0.21.1, html-4.0.2, metadata-3.1.1, ordering-0.6, rerunfailures-15.0, xdist-3.6.1, seleniumbase-4.37.6
+asyncio: mode=Mode.STRICT
+collecting ... collected 1 item
+
+tests/test_router_regression.py::test_router_classification_accuracy 
+Mis-classified (10/20):
+  [analysis] score=0.5 expected=high predicted=low: Write a comprehensive analysis of the geopolitical implicati...
+  [reasoning] score=0.5 expected=high predicted=low: Design a multi-step reasoning framework for evaluating contr...
+  [code] score=0.5 expected=high predicted=low: Generate a complete Python class with error handling, loggin...
+  [synthesis] score=0.5 expected=high predicted=low: Synthesize the key arguments from these 5 conflicting academ...
+  [reasoning] score=0.5 expected=high predicted=low: Evaluate the logical consistency of this multi-premise argum...
+  [technical] score=0.5 expected=high predicted=low: Write a detailed technical specification for a distributed c...
+  [analysis] score=0.5 expected=high predicted=low: Analyze the financial risk profile of this investment portfo...
+  [creative] score=0.6 expected=high predicted=low: Generate creative fiction with complex character development...
+  [code] score=0.6 expected=high predicted=low: Debug this complex multi-threaded Python code and explain th...
+  [analysis] score=0.5 expected=high predicted=low: Compare and contrast the epistemological frameworks of 5 maj...
+FAILED
+
+================================== FAILURES ===================================
+_____________________ test_router_classification_accuracy _____________________
+
+    def test_router_classification_accuracy() -> None:
+        """Router must correctly classify at least 85% of the fixture prompts."""
+        data = json.loads(FIXTURES_PATH.read_text())
+        fixtures = data["fixtures"]
+        threshold = data["threshold_accuracy"]
+    
+        correct = 0
+        wrong = []
+    
+        for item in fixtures:
+            prompt = item["prompt"]
+            expected = item["expected"]  # "low" or "high"
+            score = classify_complexity(prompt)
+            predicted = "high" if score >= 0.7 else "low"
+    
+            if predicted == expected:
+                correct += 1
+            else:
+                wrong.append({
+                    "prompt": prompt[:60] + "...",
+                    "expected": expected,
+                    "predicted": predicted,
+                    "score": round(score, 2),
+                    "category": item["category"],
+                })
+    
+        accuracy = correct / len(fixtures)
+    
+        if wrong:
+            details = "\n".join(
+                f"  [{w['category']}] score={w['score']} expected={w['expected']} "
+                f"predicted={w['predicted']}: {w['prompt']}"
+                for w in wrong
+            )
+            print(f"\nMis-classified ({len(wrong)}/{len(fixtures)}):\n{details}")
+    
+>       assert accuracy >= threshold, (
+            f"Router accuracy {accuracy:.1%} is below threshold {threshold:.0%}. "
+            f"{len(wrong)} prompts mis-classified. "
+            f"Update heuristics in src/dagpipe/router.py."
+        )
+E       AssertionError: Router accuracy 50.0% is below threshold 85%. 10 prompts mis-classified. Update heuristics in src/dagpipe/router.py.
+E       assert 0.5 >= 0.85
+
+tests\test_router_regression.py:58: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_router_regression.py::test_router_classification_accuracy
+============================== 1 failed in 0.36s ==============================

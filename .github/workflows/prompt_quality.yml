@@ -1,0 +1,40 @@
+name: Prompt Quality
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/dagpipe/generator/**'
+      - 'tests/promptfoo_config.yaml'
+
+jobs:
+  prompt-quality:
+    name: Generator prompt regression test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install promptfoo
+        run: npm install -g promptfoo
+
+      - name: Run prompt quality tests
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          promptfoo eval --config tests/promptfoo_config.yaml --output results.json
+          promptfoo show results.json
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-quality-results
+          path: results.json
+          retention-days: 14
