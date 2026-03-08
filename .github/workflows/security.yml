@@ -1,5 +1,4 @@
 name: Security Audit
-
 on:
   push:
     branches: [ main ]
@@ -7,22 +6,18 @@ on:
     branches: [ main ]
   schedule:
     - cron: '0 7 * * *'
-
 jobs:
   audit:
     name: pip-audit vulnerability scan
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install and audit DagPipe dependencies only
         run: |
           pip install pip-audit pydantic pyyaml
-          pip-audit --strict pydantic pyyaml
+          pip-audit --strict

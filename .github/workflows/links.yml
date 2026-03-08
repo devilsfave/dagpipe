@@ -24,7 +24,7 @@ jobs:
           args: |
             --verbose
             --no-progress
-            --exclude-mail
+            
             --exclude 'localhost'
             --exclude 'pypistats.org'
             --max-retries 3
