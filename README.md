@@ -30,7 +30,7 @@ Re-run → research ✓ (restored) → outline ✓ (restored) → draft (re-runs
 
 ## Why DagPipe Exists
 
-Every LLM orchestrator in 2025 has the same fatal flaw: when a node fails, the entire
+Every LLM orchestrator has the same fatal flaw: when a node fails, the entire
 pipeline fails. You lose everything. You restart from zero. You burn API credits re-running
 work that already succeeded.
 
@@ -331,7 +331,7 @@ Your Tasks (YAML or Python list of DAGNodes)
 
 > Default behavior: **v0.1.x runs nodes sequentially.**
 
-Even if nodes are topologically independent, the orchestrator executes them one at a time to ensure maximum crash predictability. Parallel execution is on the roadmap for v0.2.0.
+Even if nodes are topologically independent, the orchestrator executes them one at a time to ensure maximum crash predictability. Parallel execution is on the roadmap for v0.3.0.
 
 ---
 
@@ -359,7 +359,7 @@ nodes = [DAGNode(id="step_a", fn_name="fn_a", complexity=0.3)]
 ### `dagpipe.checkpoints`: Crash Recovery
 Saves node output to disk after every successful execution. On resume, completed nodes are skipped entirely.
 
-> **New in v0.1.0:** the `CheckpointStorage` Protocol.
+> **New in v0.2.0:** the `CheckpointStorage` Protocol.
 
 `FilesystemCheckpoint` is used by default. To use a custom backend (Redis, S3, in-memory), implement the protocol:
 
@@ -493,7 +493,7 @@ The `PipelineOrchestrator` respects the `max_retries` parameter. If a node exhau
 
 **Does this support parallel or async execution?**
 
-Not yet. `v0.1.x` executes nodes sequentially. Full `asyncio` support for concurrent execution of independent nodes is on the roadmap for `v0.2.0`. The focus of this version is crash resilience and state persistence.
+Not yet. `v0.1.x` executes nodes sequentially. Full `asyncio` support for concurrent execution of independent nodes is on the roadmap for `v0.3.0`. The focus of this version is crash resilience and state persistence.
 
 **How do I use DagPipe from Claude Desktop or Cursor?**
 
@@ -539,7 +539,7 @@ Phase 3: Actors + MCP         ████████████████�
 Phase 4: Auto-Migrator        ░░░░░░░░░░░░░░░░░░░░  UPCOMING
 ```
 
-**Test coverage:** 59 tests · 4 modules · 0 regressions
+**Test coverage:** 108 tests · 4 modules · 0 regressions
 
 ---
 

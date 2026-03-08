@@ -59,6 +59,10 @@ COUNCIL_LOG.md
 HANDOFF.md
 INTELLIGENCE_BRIEF.md
 DagPipe_Session1_Summary.md
+V2_INTEGRATION_REPORT.md
+router_test_out.txt
+tmp_*.py
+check_staleness_out.txt
 
 # Development
 .vscode/
