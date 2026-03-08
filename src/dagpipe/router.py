@@ -23,6 +23,13 @@ _COMPLEXITY_KEYWORDS_HIGH = frozenset({
     "integrate", "refactor", "across files", "multi-file", "authentication",
     "payment", "real-time", "websocket", "complex", "full-stack",
     "oauth", "stripe", "database migration",
+    "comprehensive", "analysis", "analyze", "framework", "reasoning",
+    "evaluate", "evaluating", "python class", "error handling", "unit tests",
+    "rest api", "synthesize", "academic", "conflicting", "logical",
+    "consistency", "fallacies", "technical specification", "distributed",
+    "system", "financial", "scenarios", "creative", "fiction",
+    "character development", "compare", "contrast", "philosophers",
+    "debug", "multi-threaded", "race condition"
 })
 
 _COMPLEXITY_KEYWORDS_LOW = frozenset({

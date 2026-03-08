@@ -69,7 +69,7 @@ _DEFAULT_TOKEN_PRICING_USD_PER_1K: dict[str, float] = {
     "llama-3.3-70b-versatile": 0.00059,
     "llama-3.1-70b-versatile": 0.00059,
     "llama-3.1-8b-instant": 0.00005,
-    "llama3-8b-8192": 0.00005,
+    "llama-3.1-8b-instant": 0.00005,
     # Google (free tier)
     "gemini-2.5-flash": 0.0,
     "gemini-2.5-flash": 0.0,
@@ -160,23 +160,23 @@ class CheckpointStorage(Protocol):
     def clear(self) -> None: ...
 
 
-class FilesystemCheckpoint:
+class FilesystemCheckpoint(CheckpointStorage):
     """Default checkpoint backend — wraps checkpoints.py. Backward compatible."""
 
-    def __init__(self, checkpoint_dir: Path) -> None:
-        self._dir = checkpoint_dir
+    def __init__(self, directory: Path | str) -> None:
+        self._dir = directory
 
     def save(self, node_id: str, data: dict) -> None:
-        checkpoint(node_id, data, checkpoint_dir=self._dir)
+        checkpoint(node_id, data, self._dir)
 
     def load(self, node_id: str) -> Optional[dict]:
-        return restore(node_id, checkpoint_dir=self._dir)
+        return restore(node_id, self._dir)
 
     def exists(self, node_id: str) -> bool:
-        return checkpoint_exists(node_id, checkpoint_dir=self._dir)
+        return checkpoint_exists(node_id, self._dir)
 
     def clear(self) -> None:
-        clear_checkpoints(checkpoint_dir=self._dir)
+        clear_checkpoints(self._dir)
 
     # ── V2 helpers (used by orchestrator for dead letter / circuit breaker) ──
 

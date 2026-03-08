@@ -1,0 +1,107 @@
+{
+    "description": "Labelled dataset for router regression testing. Add new examples as edge cases are discovered.",
+    "version": "1.0",
+    "threshold_accuracy": 0.85,
+    "fixtures": [
+        {
+            "prompt": "What is the capital of France?",
+            "expected": "low",
+            "category": "factual"
+        },
+        {
+            "prompt": "Translate hello to Spanish",
+            "expected": "low",
+            "category": "translation"
+        },
+        {
+            "prompt": "Summarize this in one sentence",
+            "expected": "low",
+            "category": "summary"
+        },
+        {
+            "prompt": "Fix the grammar in this sentence",
+            "expected": "low",
+            "category": "editing"
+        },
+        {
+            "prompt": "What does API stand for?",
+            "expected": "low",
+            "category": "factual"
+        },
+        {
+            "prompt": "List 5 colors",
+            "expected": "low",
+            "category": "list"
+        },
+        {
+            "prompt": "Convert this JSON to YAML",
+            "expected": "low",
+            "category": "format"
+        },
+        {
+            "prompt": "What year was Python created?",
+            "expected": "low",
+            "category": "factual"
+        },
+        {
+            "prompt": "Classify this as positive or negative",
+            "expected": "low",
+            "category": "classification"
+        },
+        {
+            "prompt": "Extract the email address from this text",
+            "expected": "low",
+            "category": "extraction"
+        },
+        {
+            "prompt": "Write a comprehensive analysis of the geopolitical implications of AI regulation across G20 nations",
+            "expected": "high",
+            "category": "analysis"
+        },
+        {
+            "prompt": "Design a multi-step reasoning framework for evaluating contradictory scientific claims",
+            "expected": "high",
+            "category": "reasoning"
+        },
+        {
+            "prompt": "Generate a complete Python class with error handling, logging, and unit tests for a REST API client",
+            "expected": "high",
+            "category": "code"
+        },
+        {
+            "prompt": "Synthesize the key arguments from these 5 conflicting academic papers on climate policy",
+            "expected": "high",
+            "category": "synthesis"
+        },
+        {
+            "prompt": "Evaluate the logical consistency of this multi-premise argument and identify all fallacies",
+            "expected": "high",
+            "category": "reasoning"
+        },
+        {
+            "prompt": "Write a detailed technical specification for a distributed caching system",
+            "expected": "high",
+            "category": "technical"
+        },
+        {
+            "prompt": "Analyze the financial risk profile of this investment portfolio across multiple scenarios",
+            "expected": "high",
+            "category": "analysis"
+        },
+        {
+            "prompt": "Generate creative fiction with complex character development and thematic depth",
+            "expected": "high",
+            "category": "creative"
+        },
+        {
+            "prompt": "Debug this complex multi-threaded Python code and explain the race condition",
+            "expected": "high",
+            "category": "code"
+        },
+        {
+            "prompt": "Compare and contrast the epistemological frameworks of 5 major philosophers",
+            "expected": "high",
+            "category": "analysis"
+        }
+    ]
+}

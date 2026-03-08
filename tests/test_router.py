@@ -50,7 +50,7 @@ def test_high_complexity_routes_to_high_fn() -> None:
 
 def test_high_complexity_falls_back_when_budget_zero() -> None:
     """High complexity routes to fallback when Groq budget is 0."""
-    router = _make_router(groq_rpm_limit=0)
+    router = _make_router(rpm_limit=0)
     fn, label = router.route(0.9)
     assert fn is _fallback_fn
     assert label == "gemini_flash"
@@ -58,7 +58,7 @@ def test_high_complexity_falls_back_when_budget_zero() -> None:
 
 def test_budget_depletes_then_falls_back() -> None:
     """After consuming all budget, high complexity falls back."""
-    router = _make_router(groq_rpm_limit=2)
+    router = _make_router(rpm_limit=2)
 
     fn1, _ = router.route(0.8)
     assert fn1 is _high_fn

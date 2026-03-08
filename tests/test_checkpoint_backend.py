@@ -233,7 +233,7 @@ def test_deprecated_checkpoint_dir_emits_warning(tmp_path: Path) -> None:
         PipelineOrchestrator(
             nodes=nodes,
             node_registry=registry,
-            checkpoint_dir=tmp_path / "ckpt",
+            directory=tmp_path / "ckpt",
         )
 
     dep_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
@@ -252,9 +252,9 @@ def test_deprecated_checkpoint_dir_still_persists(tmp_path: Path) -> None:
         orch = PipelineOrchestrator(
             nodes=nodes,
             node_registry=registry,
-            checkpoint_dir=ckpt_dir,
+            directory=ckpt_dir,
         )
     orch.run()
 
     # File must exist on disk — backward compat is preserved
-    assert checkpoint_exists("research", checkpoint_dir=ckpt_dir)
+    assert checkpoint_exists("research", directory=ckpt_dir)

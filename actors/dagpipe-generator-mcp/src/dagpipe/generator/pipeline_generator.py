@@ -217,7 +217,7 @@ def runner_writer(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
                 "--- EXACT LLM WRAPPER FUNCTIONS ---\n"
                 "def call_groq_8b(messages: list) -> str:\n"
                 "    resp = client.chat.completions.create(\n"
-                "        model='llama3-8b-8192',\n"
+                "        model='llama-3.1-8b-instant',\n"
                 "        messages=messages,\n"
                 "        max_tokens=2048,\n"
                 "    )\n"
