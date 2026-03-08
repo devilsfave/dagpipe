@@ -1,0 +1,24 @@
+name: Staleness Check
+
+on:
+  push:
+    branches: [ main, "v*" ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  staleness:
+    name: Check for stale model names and deprecated APIs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run staleness scanner
+        run: python scripts/check_staleness.py .
