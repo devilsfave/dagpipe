@@ -84,3 +84,11 @@ build/
 .actor/storage/
 actor/storage/
 storage/
+
+DIAGNOSTIC_REPORT.md
+PROJECT_STATUS.md
+V2_INTEGRATION_REPORT.md
+router_test_out.txt
+security_fail.log
+tmp_*.py
+check_staleness_out.txt
