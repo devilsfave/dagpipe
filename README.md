@@ -367,7 +367,7 @@ DagPipe is designed to run entirely on free tiers:
 | Modal | Any 7B model | $30/month free credits |
 | Ollama | Any model | Local, unlimited |
 
-> ⚠️ Gemini 2.0 Flash was retired March 3, 2026. If your code references `gemini-2.0-flash`, update it to `gemini-2.5-flash`.
+> ⚠️ Gemini 2.0 Flash was retired March 3, 2026. Update any old model references to `gemini-2.5-flash`.
 
 Wire any of these as your `low_complexity_fn`, `high_complexity_fn`, or `fallback_fn`. DagPipe is provider-agnostic — any Python callable works.
 
@@ -554,3 +554,4 @@ MIT — built for the global developer community.
 </p>
 
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:161b22,100:00d9ff&height=120&section=footer"/>
+
