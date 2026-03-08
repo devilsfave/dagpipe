@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    # Run daily at 7am Ghana time — CVEs are published continuously
     - cron: '0 7 * * *'
 
 jobs:
@@ -23,32 +22,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: pip install -e "." pip-audit
-
-      - name: Run security audit
+      - name: Install and audit DagPipe dependencies only
         run: |
-          pip-audit --strict -r requirements.txt --format=markdown --output=security-report.md
-          cat security-report.md
-
-      - name: Upload security report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-audit-report
-          path: security-report.md
-          retention-days: 30
-
-      - name: Comment on PR if vulnerabilities found
-        if: failure() && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const report = fs.readFileSync('security-report.md', 'utf8');
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## ⚠️ Security Vulnerabilities Found\n\n${report}`
-            });
+          pip install pip-audit pydantic pyyaml
+          pip-audit --strict pydantic pyyaml

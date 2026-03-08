@@ -50,6 +50,8 @@
 ---
 
 ## 📍 Blockers / Risks
+- **RESOLVED (March 8, 2026):** GitHub Actions Billing lock resolved. All automated CI is fully operational.
+- **FINAL PRE-LAUNCH TASK:** Herbert must manually publish `v0.2.0` to PyPI.
 - **Low Priority:** Smithery "Optional config" 15pt score unresolved (non-blocking for revenue).
 - **Advisory:** Gemini 2.0 Flash retired March 3, 2026. All new tools must use `gemini-2.5-flash`.
 - **Advisory:** ChatGPT defaults to GPT-5.3 as of Feb 2026. Avoid legacy AI references in documentation.
