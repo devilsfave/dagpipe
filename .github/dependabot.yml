@@ -1,0 +1,40 @@
+version: 2
+
+updates:
+  # Python dependencies (pyproject.toml)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Africa/Accra"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devilsfave"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "deps"
+    ignore:
+      # Do not auto-update major versions — those need manual review
+      - dependency-name: "pydantic"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pyyaml"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions versions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Africa/Accra"
+    open-pull-requests-limit: 5
+    labels:
+      - "ci"
+      - "automated"
+    commit-message:
+      prefix: "ci"

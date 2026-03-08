@@ -1,0 +1,53 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, "v*" ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run weekly on Sunday at 8am Ghana time to catch upstream breakage
+    - cron: '0 8 * * 0'
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }} / deps ${{ matrix.deps }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false  # Run all matrix combinations even if one fails
+      matrix:
+        python-version: ["3.12", "3.13"]
+        deps: ["pinned", "latest"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install pinned dependencies
+        if: matrix.deps == 'pinned'
+        run: |
+          pip install -e ".[dev]"
+          pip install pytest
+
+      - name: Install latest dependencies
+        if: matrix.deps == 'latest'
+        run: |
+          pip install --upgrade pydantic pyyaml pytest
+          pip install -e "."
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
+
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.python-version }}-${{ matrix.deps }}
+          path: pytest-output.txt
+          retention-days: 7
