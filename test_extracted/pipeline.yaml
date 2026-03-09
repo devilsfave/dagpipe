@@ -1,0 +1,18 @@
+nodes:
+- id: summarize
+  fn: summarize
+  depends_on: []
+  complexity: 0.5
+  is_deterministic: false
+  description: sum
+  assert_logic: 'lambda x: True'
+  assert_message: err
+- id: classify
+  fn: classify
+  depends_on:
+  - summarize
+  complexity: 0.3
+  is_deterministic: false
+  description: class
+  assert_logic: null
+  assert_message: null

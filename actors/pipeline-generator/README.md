@@ -7,8 +7,10 @@ Turn plain-English descriptions into robust, crash-proof LLM orchestration pipel
 Building multi-step LLM workflows that involve crawling, scraping, summarizing, or transforming data is often fragile. A single failure mid-run means starting over and wasting tokens. **DagPipe** solves this by turning workflows into a resilient Directed Acyclic Graph (DAG) with:
 
 1.  **JSON Checkpointing**: Resume exactly from the last successful node if anything fails.
-2.  **Cognitive Routing**: Automatically route easy tasks to free/cheap models (like Llama 3 8B) and complex tasks to large models (like Llama 3 70B).
-3.  **Schema Enforcement**: Guaranteed structured JSON output with automatic retry loops and error feedback.
+2.  **Self-healing Model Registry**: Automatically validates model availability and pricing via live APIs.
+3.  **Cognitive Routing**: Automatically route easy tasks to free/cheap models and complex tasks to large models with Escalation on retry.
+4.  **Semantic Assertions**: Guaranteed quality with `assert_fn` support for robust output validation.
+5.  **Enhanced Telemetry**: Full `PipelineRun` metrics including token counts and estimated cost.
 
 This actor takes your plain-English goal and generates a complete, ready-to-run Python script (`runner.py`) using the DagPipe library.
 
