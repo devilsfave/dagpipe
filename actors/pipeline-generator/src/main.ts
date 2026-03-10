@@ -59,7 +59,7 @@ log.info(`Pipeline generated successfully! Files included: ${result.files_includ
 
 // Push to KeyValueStore for direct download
 const zipPath = result.zip_path;
-const zipFilename = result.zip_filename || 'latest_pipeline.zip';
+const zipFilename = result.zip_filename;
 if (existsSync(zipPath)) {
     const zipData = readFileSync(zipPath);
     await Actor.setValue(zipFilename, zipData, { contentType: 'application/zip' });
@@ -71,7 +71,7 @@ if (existsSync(zipPath)) {
 
     await Actor.pushData({
         message: "Pipeline successfully generated!",
-        download_url: downloadUrl,
+        zipUrl: downloadUrl,
         files: result.files_included
     });
 
