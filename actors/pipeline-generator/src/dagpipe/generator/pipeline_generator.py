@@ -333,6 +333,7 @@ def runner_writer(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
                 "    node_registry=registry,  # 'registry' dict mapped to your functions\n"
                 "    router=router,\n"
                 "    model_registry=model_reg,\n"
+                "    verbose=True,\n"
                 ")\n"
                 "state, run = orch.run(initial_state={'input': '...'})  # V2 returns (state, run)\n\n"
                 "For nodes with assertions, use 'assert_fn=eval(node_cfg[\"assert_logic\"])' or a direct lambda.\n"

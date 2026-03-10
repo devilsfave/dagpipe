@@ -1,4 +1,4 @@
-"""DagPipe v0.2.0 — DAG Pipeline Orchestrator
+"""DagPipe v0.2.1 — DAG Pipeline Orchestrator
 
 DROP-IN REPLACEMENT for v0.1.x dag.py.
 Every v0.1.x call works identically. All new features are opt-in via
@@ -411,6 +411,7 @@ class PipelineOrchestrator:
         checkpoint_dir: Path | None = None,       # DEPRECATED — use checkpoint_backend
         max_retries: int = 3,
         on_node_complete: Callable[..., Any] | None = None,
+        verbose: bool = False,
         # ── V2 new parameters (all optional, all default to safe values) ──────
         secrets: dict[str, Any] | None = None,
         isolate_context: bool = False,
@@ -429,6 +430,7 @@ class PipelineOrchestrator:
         self.max_retries = max_retries
         self.router = router
         self.on_node_complete = on_node_complete
+        self._verbose = verbose
 
         # V2 options
         self._secrets: dict[str, Any] = secrets or {}
@@ -490,6 +492,9 @@ class PipelineOrchestrator:
             self.checkpoint_backend.clear()
 
         self.state = dict(initial_state) if initial_state else {}
+        if self._verbose:
+            pipeline_name = getattr(self, '_pipeline_name', 'pipeline')
+            print(f"[DagPipe] Starting pipeline: {pipeline_name} ({len(self.sorted_nodes)} nodes)")
         self._initial_state_ref = initial_state or {}
 
         # Restore checkpoints
@@ -592,6 +597,10 @@ class PipelineOrchestrator:
             run.estimated_total_tokens += node_result["tokens"] or 0
             run.estimated_total_cost_usd += node_result["cost"] or 0.0
 
+            if self._verbose:
+                desc = getattr(node, 'description', '') or ''
+                desc_part = f" — {desc}" if desc else ""
+                print(f"[DagPipe] ✓ {node.id}{desc_part} ({node_result['duration']:.1f}s)")
             if self.on_node_complete is not None:
                 self.on_node_complete(node.id, node_result["output"], node_result["duration"])
 
@@ -600,6 +609,9 @@ class PipelineOrchestrator:
         run.total_duration_seconds = time.time() - t_pipeline_start
         if run.status != "failed":
             run.status = "success"
+
+        if self._verbose:
+            print(f"[DagPipe] Pipeline complete — {run.total_duration_seconds:.1f}s | ${run.estimated_total_cost_usd:.4f}")
 
         # Backward compat: always return the state dict
         # If caller unpacks two values they get (state, run)
