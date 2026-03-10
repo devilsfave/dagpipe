@@ -1,7 +1,9 @@
 import json
 import io
 import os
+import sys
 from unittest.mock import patch, MagicMock
+sys.modules['groq'] = MagicMock()
 from pathlib import Path
 import importlib.util
 
