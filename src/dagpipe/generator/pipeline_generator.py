@@ -101,7 +101,16 @@ def schema_designer(context: dict[str, Any], model: Any = None) -> dict[str, Any
                 "to validate the node's output) and assert_message for "
                 "critical nodes. The last node should typically be "
                 "deterministic. Chain nodes linearly unless parallel "
-                "execution makes sense."
+                "execution makes sense.\n\n"
+                "RETURN KEY CONTRACTS — assert_logic MUST use these exact keys "
+                "(they match what runner.py actually returns):\n"
+                "  LLM / process node:  lambda out: bool(out.get('output'))\n"
+                "  Save / write node:   lambda out: out.get('file_saved') is True\n"
+                "  Load / read node:    lambda out: bool(out.get('loaded_data'))\n"
+                "  Fetch / HTTP node:   lambda out: bool(out.get('fetched_data'))\n"
+                "  Transform node:      lambda out: bool(out.get('transformed'))\n"
+                "  Status / done node:  lambda out: out.get('status') == 'complete'\n"
+                "Use ONLY these keys in assert_logic. Do NOT invent other key names."
             ),
         },
         {
@@ -235,12 +244,35 @@ def runner_writer(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
                 "        max_tokens=2048,\n"
                 "    )\n"
                 "    return resp.choices[0].message.content\n\n"
+                "--- RETURN KEY CONTRACTS (CRITICAL — follow exactly) ---\n"
+                "Every node type has a FIXED return key. Use these EXACTLY. Do NOT invent new keys.\n"
+                "The pipeline.yaml assert_logic checks these same keys — mismatches crash the pipeline.\n\n"
+                "  LLM / process node:  return {'output': result}\n"
+                "  Save / write node:   return {'file_saved': True}\n"
+                "  Load / read node:    return {'loaded_data': data}\n"
+                "  Fetch / HTTP node:   return {'fetched_data': data}\n"
+                "  Transform node:      return {'transformed': result}\n"
+                "  Status / done node:  return {'status': 'complete'}\n\n"
                 "--- EXACT NODE FUNCTION SIGNATURE ---\n"
                 "def my_node(context: dict, model=None) -> dict:\n"
                 "    # Build prompt using context from upstream nodes\n"
                 "    prompt = f\"Process this: {context.get('input')}\"\n"
                 "    result = model([{'role': 'user', 'content': prompt}]) if model else 'no model'\n"
                 "    return {'output': result}\n\n"
+                "--- EXACT SAVE NODE PATTERN (use for ANY node that writes to disk) ---\n"
+                "def save_to_json(context: dict, model=None) -> dict:\n"
+                "    \"\"\"Save output to JSON file.\"\"\"\n"
+                "    # ALWAYS guard context.get() with 'or \"\"' to prevent None write errors\n"
+                "    data = str(context.get('previous_node', {}).get('output') or '')\n"
+                "    out_path = Path('output.json')\n"
+                "    out_path.write_text(data, encoding='utf-8')\n"
+                "    return {'file_saved': True}  # MUST use 'file_saved' — no other key\n\n"
+                "def save_to_txt(context: dict, model=None) -> dict:\n"
+                "    \"\"\"Save output to text file.\"\"\"\n"
+                "    data = str(context.get('previous_node', {}).get('output') or '')\n"
+                "    out_path = Path('output.txt')\n"
+                "    out_path.write_text(data, encoding='utf-8')\n"
+                "    return {'file_saved': True}  # MUST use 'file_saved' — no other key\n\n"
                 "--- EXACT REGISTRY AND ROUTER ---\n"
                 "model_reg = ModelRegistry(groq_api_key=os.environ.get('GROQ_API_KEY'))\n"
                 "router = ModelRouter(\n"
@@ -343,6 +375,24 @@ def _fallback_runner(nodes: list[dict[str, Any]], use_case: str) -> str:
 # NODE 5: packager
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _slugify_use_case(use_case: str, max_words: int = 5) -> str:
+    """Slugify a use_case string into a safe filename component.
+
+    Takes the first ``max_words`` words, lowercases, keeps only alphanumeric
+    characters, joins with underscores.
+
+    Examples:
+        "Summarize news articles and send email" -> "summarize_news_articles_and_send"
+        ""  -> "pipeline"
+    """
+    import re
+    words = use_case.strip().split()[:max_words]
+    slug = "_".join(
+        re.sub(r"[^a-z0-9]", "", w.lower()) for w in words
+    )
+    return slug or "pipeline"
+
+
 def packager(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     """Package generated files into a zip archive.
 
@@ -376,8 +426,10 @@ def packager(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     (tmp_dir / "runner.py").write_text(script_content, encoding="utf-8")
     (tmp_dir / "README.md").write_text(readme, encoding="utf-8")
 
-    # Create zip in the same temp directory
-    zip_path = tmp_dir / "pipeline.zip"
+    # Create zip with a slugified name derived from the pipeline use_case
+    slug = _slugify_use_case(use_case)
+    zip_filename = f"{slug}_pipeline.zip"
+    zip_path = tmp_dir / zip_filename
     files_to_zip = ["pipeline.yaml", "runner.py", "README.md"]
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for fname in files_to_zip:
@@ -386,6 +438,7 @@ def packager(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     return {
         "zip_path": str(zip_path),
         "files_included": files_to_zip,
+        "zip_filename": zip_filename,
     }
 
 

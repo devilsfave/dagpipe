@@ -38,6 +38,14 @@ class NodeSpec(BaseModel):
         default=False,
         description="True if node needs no LLM call",
     )
+    assert_logic: str | None = Field(
+        default=None,
+        description="Python lambda logic for semantic validation (e.g. 'lambda out: out.get(\"status\") == \"ok\"')",
+    )
+    assert_message: str | None = Field(
+        default=None,
+        description="Reason to show when assertion fails",
+    )
 
 
 class DAGDesignOutput(BaseModel):

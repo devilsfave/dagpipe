@@ -93,12 +93,24 @@ def schema_designer(context: dict[str, Any], model: Any = None) -> dict[str, Any
             "content": (
                 "You are a DAG architect. Design a pipeline DAG from the "
                 "given steps. Each node needs: id (snake_case), fn_name "
-                "(same as id), depends_on (list of upstream node IDs), "
-                "complexity (0.0-1.0 where higher = harder), description, "
-                "and is_deterministic (true only for final packaging steps "
-                "that need no LLM). The last node should typically be "
+                "id (snake_case), fn_name (same as id), depends_on (list of "
+                "upstream node IDs), complexity (0.0-1.0 where higher = "
+                "harder), description, and is_deterministic (true only "
+                "for final packaging steps that need no LLM). "
+                "Additionally, provide assert_logic (a Python lambda string "
+                "to validate the node's output) and assert_message for "
+                "critical nodes. The last node should typically be "
                 "deterministic. Chain nodes linearly unless parallel "
-                "execution makes sense."
+                "execution makes sense.\n\n"
+                "RETURN KEY CONTRACTS — assert_logic MUST use these exact keys "
+                "(they match what runner.py actually returns):\n"
+                "  LLM / process node:  lambda out: bool(out.get('output'))\n"
+                "  Save / write node:   lambda out: out.get('file_saved') is True\n"
+                "  Load / read node:    lambda out: bool(out.get('loaded_data'))\n"
+                "  Fetch / HTTP node:   lambda out: bool(out.get('fetched_data'))\n"
+                "  Transform node:      lambda out: bool(out.get('transformed'))\n"
+                "  Status / done node:  lambda out: out.get('status') == 'complete'\n"
+                "Use ONLY these keys in assert_logic. Do NOT invent other key names."
             ),
         },
         {
@@ -145,6 +157,8 @@ def yaml_writer(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
             "complexity": node.get("complexity", 0.5),
             "is_deterministic": node.get("is_deterministic", False),
             "description": node.get("description", ""),
+            "assert_logic": node.get("assert_logic"),
+            "assert_message": node.get("assert_message"),
         }
         yaml_nodes.append(yaml_node)
 
@@ -205,15 +219,16 @@ def runner_writer(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
                 "You are a Python code generator for DagPipe pipelines. "
                 "Write a COMPLETE, RUNNABLE Python script. "
                 "Output ONLY raw Python — NO markdown, NO code fences, NO backticks.\n\n"
-                "You MUST follow this EXACT pattern for Groq and DagPipe usage:\n\n"
+                "You MUST follow this EXACT pattern for V2 DagPipe usage:\n\n"
                 "--- EXACT IMPORTS ---\n"
                 "import os\n"
                 "from pathlib import Path\n"
                 "from groq import Groq\n"
-                "from dagpipe.dag import PipelineOrchestrator\n"
+                "from dagpipe.dag import PipelineOrchestrator, DAGNode\n"
+                "from dagpipe.registry import ModelRegistry\n"
                 "from dagpipe.router import ModelRouter\n\n"
                 "--- EXACT GROQ CLIENT ---\n"
-                "client = Groq(api_key=os.environ['GROQ_API_KEY'])\n\n"
+                "client = Groq(api_key=os.environ.get('GROQ_API_KEY'))\n\n"
                 "--- EXACT LLM WRAPPER FUNCTIONS ---\n"
                 "def call_groq_8b(messages: list) -> str:\n"
                 "    resp = client.chat.completions.create(\n"
@@ -224,31 +239,60 @@ def runner_writer(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
                 "    return resp.choices[0].message.content\n\n"
                 "def call_groq_70b(messages: list) -> str:\n"
                 "    resp = client.chat.completions.create(\n"
-                "        model='llama-3.1-70b-versatile',\n"
+                "        model='llama-3.3-70b-versatile',\n"
                 "        messages=messages,\n"
                 "        max_tokens=2048,\n"
                 "    )\n"
                 "    return resp.choices[0].message.content\n\n"
+                "--- RETURN KEY CONTRACTS (CRITICAL — follow exactly) ---\n"
+                "Every node type has a FIXED return key. Use these EXACTLY. Do NOT invent new keys.\n"
+                "The pipeline.yaml assert_logic checks these same keys — mismatches crash the pipeline.\n\n"
+                "  LLM / process node:  return {'output': result}\n"
+                "  Save / write node:   return {'file_saved': True}\n"
+                "  Load / read node:    return {'loaded_data': data}\n"
+                "  Fetch / HTTP node:   return {'fetched_data': data}\n"
+                "  Transform node:      return {'transformed': result}\n"
+                "  Status / done node:  return {'status': 'complete'}\n\n"
                 "--- EXACT NODE FUNCTION SIGNATURE ---\n"
                 "def my_node(context: dict, model=None) -> dict:\n"
-                "    result = model([{'role': 'user', 'content': 'your prompt'}]) if model else 'no model'\n"
-                "    return {'output': result}  # return ONLY this node's outputs\n\n"
-                "--- EXACT MODEL ROUTER ---\n"
+                "    # Build prompt using context from upstream nodes\n"
+                "    prompt = f\"Process this: {context.get('input')}\"\n"
+                "    result = model([{'role': 'user', 'content': prompt}]) if model else 'no model'\n"
+                "    return {'output': result}\n\n"
+                "--- EXACT SAVE NODE PATTERN (use for ANY node that writes to disk) ---\n"
+                "def save_to_json(context: dict, model=None) -> dict:\n"
+                "    \"\"\"Save output to JSON file.\"\"\"\n"
+                "    # ALWAYS guard context.get() with 'or \"\"' to prevent None write errors\n"
+                "    data = str(context.get('previous_node', {}).get('output') or '')\n"
+                "    out_path = Path('output.json')\n"
+                "    out_path.write_text(data, encoding='utf-8')\n"
+                "    return {'file_saved': True}  # MUST use 'file_saved' — no other key\n\n"
+                "def save_to_txt(context: dict, model=None) -> dict:\n"
+                "    \"\"\"Save output to text file.\"\"\"\n"
+                "    data = str(context.get('previous_node', {}).get('output') or '')\n"
+                "    out_path = Path('output.txt')\n"
+                "    out_path.write_text(data, encoding='utf-8')\n"
+                "    return {'file_saved': True}  # MUST use 'file_saved' — no other key\n\n"
+                "--- EXACT REGISTRY AND ROUTER ---\n"
+                "model_reg = ModelRegistry(groq_api_key=os.environ.get('GROQ_API_KEY'))\n"
                 "router = ModelRouter(\n"
                 "    low_complexity_fn=call_groq_8b,\n"
                 "    high_complexity_fn=call_groq_70b,\n"
                 "    fallback_fn=call_groq_8b,\n"
-                "    low_label='groq-8b',\n"
-                "    high_label='groq-70b',\n"
-                "    fallback_label='groq-8b-fallback',\n"
+                "    low_label='llama-3.1-8b-instant',\n"
+                "    high_label='llama-3.3-70b-versatile',\n"
+                "    fallback_label='llama-3.1-8b-instant',\n"
+                "    rpm_limit=30,  # V2 uses rpm_limit\n"
                 ")\n\n"
                 "--- EXACT ORCHESTRATOR ---\n"
                 "orch = PipelineOrchestrator(\n"
                 "    nodes=Path(__file__).parent / 'pipeline.yaml',\n"
-                "    node_registry=registry,\n"
+                "    node_registry=registry,  # 'registry' dict mapped to your functions\n"
                 "    router=router,\n"
+                "    model_registry=model_reg,\n"
                 ")\n"
-                "result = orch.run(initial_state={'input': 'your input here'})\n\n"
+                "state, run = orch.run(initial_state={'input': '...'})  # V2 returns (state, run)\n\n"
+                "For nodes with assertions, use 'assert_fn=eval(node_cfg[\"assert_logic\"])' or a direct lambda.\n"
                 "Use these patterns EXACTLY. Do not invent alternative APIs."
             ),
         },
@@ -305,17 +349,23 @@ def _fallback_runner(nodes: list[dict[str, Any]], use_case: str) -> str:
         f'import os, sys\n'
         f'from pathlib import Path\n'
         f'from groq import Groq\n'
-        f'from dagpipe.dag import PipelineOrchestrator\n'
+        f'from dagpipe.dag import PipelineOrchestrator, load_dag\n'
+        f'from dagpipe.registry import ModelRegistry\n'
         f'from dagpipe.router import ModelRouter\n\n'
         f'{func_block}\n\n'
         f'def main():\n'
         f'    registry = {{{registry_items}}}\n'
+        f'    model_reg = ModelRegistry(groq_api_key=os.environ.get("GROQ_API_KEY"))\n'
+        f'    # V2 load_dag expects a Path\n'
+        f'    nodes = load_dag(Path(__file__).parent / "pipeline.yaml")\n'
         f'    orch = PipelineOrchestrator(\n'
-        f'        nodes=Path(__file__).parent / "pipeline.yaml",\n'
+        f'        nodes=nodes,\n'
         f'        node_registry=registry,\n'
+        f'        model_registry=model_reg,\n'
         f'    )\n'
-        f'    result = orch.run()\n'
-        f'    print(result)\n\n'
+        f'    state, run = orch.run()\n'
+        f'    print(f"Status: {{run.status}}")\n'
+        f'    print(f"Cost: ${{run.estimated_total_cost_usd:.4f}}")\n\n'
         f'if __name__ == "__main__":\n'
         f'    main()\n'
     )
@@ -324,6 +374,24 @@ def _fallback_runner(nodes: list[dict[str, Any]], use_case: str) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 # NODE 5: packager
 # ─────────────────────────────────────────────────────────────────────────────
+
+def _slugify_use_case(use_case: str, max_words: int = 5) -> str:
+    """Slugify a use_case string into a safe filename component.
+
+    Takes the first ``max_words`` words, lowercases, keeps only alphanumeric
+    characters and hyphens, joins with underscores.
+
+    Examples:
+        "Summarize news articles and send email" -> "summarize_news_articles_and_send"
+        ""  -> "pipeline"
+    """
+    import re
+    words = use_case.strip().split()[:max_words]
+    slug = "_".join(
+        re.sub(r"[^a-z0-9]", "", w.lower()) for w in words
+    )
+    return slug or "pipeline"
+
 
 def packager(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     """Package generated files into a zip archive.
@@ -358,8 +426,10 @@ def packager(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     (tmp_dir / "runner.py").write_text(script_content, encoding="utf-8")
     (tmp_dir / "README.md").write_text(readme, encoding="utf-8")
 
-    # Create zip in the same temp directory
-    zip_path = tmp_dir / "pipeline.zip"
+    # Create zip with a slugified name derived from the pipeline use_case
+    slug = _slugify_use_case(use_case)
+    zip_filename = f"{slug}_pipeline.zip"
+    zip_path = tmp_dir / zip_filename
     files_to_zip = ["pipeline.yaml", "runner.py", "README.md"]
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for fname in files_to_zip:
@@ -368,6 +438,7 @@ def packager(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     return {
         "zip_path": str(zip_path),
         "files_included": files_to_zip,
+        "zip_filename": zip_filename,
     }
 
 
