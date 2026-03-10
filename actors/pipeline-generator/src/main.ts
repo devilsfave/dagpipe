@@ -59,14 +59,15 @@ log.info(`Pipeline generated successfully! Files included: ${result.files_includ
 
 // Push to KeyValueStore for direct download
 const zipPath = result.zip_path;
+const zipFilename = result.zip_filename || 'latest_pipeline.zip';
 if (existsSync(zipPath)) {
     const zipData = readFileSync(zipPath);
-    await Actor.setValue('latest_pipeline.zip', zipData, { contentType: 'application/zip' });
+    await Actor.setValue(zipFilename, zipData, { contentType: 'application/zip' });
 
     // Provide a neat final output to the user with a direct download link
     const kvs = await Actor.openKeyValueStore();
     const storeId = kvs.id || (kvs as any).storeId;
-    const downloadUrl = `https://api.apify.com/v2/key-value-stores/${storeId}/records/latest_pipeline.zip`;
+    const downloadUrl = `https://api.apify.com/v2/key-value-stores/${storeId}/records/${zipFilename}`;
 
     await Actor.pushData({
         message: "Pipeline successfully generated!",

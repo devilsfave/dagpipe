@@ -54,11 +54,13 @@ def main():
         # Write output to stdout so Node.js can parse it
         zip_path_str = result["packager"]["zip_path"]
         files = result["packager"].get("files_included", [])
+        zip_filename = result["packager"].get("zip_filename", "latest_pipeline.zip")
         
         output = {
             "status": "success",
             "zip_path": zip_path_str,
-            "files_included": files
+            "files_included": files,
+            "zip_filename": zip_filename
         }
         print(json.dumps(output))
         sys.exit(0)
