@@ -89,9 +89,18 @@ pip install dagpipe-core
 
 ---
 
+## What's New in v0.2.1
+
+**v0.2.1** brings crucial generator reliability fixes and a highly requested DX feature:
+
+- **`verbose=True` Output**: Pass `verbose=True` to the `PipelineOrchestrator` to get real-time, per-node CLI progress updates with execution times, node descriptions, and running costs.
+- **Generator Core Fixes**: The MCP and Apify generator prompts now strictly enforce the `model=None` positional argument, guarantee exact YAML topological dependency key lookups (`DEPENDENCY_NODE_ID`), and support native `.csv`, `.xml`, `.html`, and `.md` save nodes out of the box.
+
+---
+
 ## What's New in v0.2.0
 
-**v0.2.0** is a significant upgrade. All features are opt-in and fully backwards compatible — existing v0.1.x pipelines run without changes.
+**v0.2.0** was a significant architectural upgrade. All features are opt-in and fully backwards compatible — existing v0.1.x pipelines run without changes.
 
 ### Smart Model Router
 The router automatically selects which AI model to use based on task complexity. Simple tasks go to fast, free models. Hard tasks escalate to more capable models. If a model fails or rate-limits, it tries the next one — automatically.
@@ -476,7 +485,7 @@ More templates coming. Have a use case? [Open an issue.](https://github.com/devi
 ```
 Phase 1: Core Library + Checkpointing   ████████████████████  COMPLETE (v0.1.0)
 Phase 2: PyPI + Templates + Actors      ████████████████████  COMPLETE (v0.1.0)
-Phase 3: V2 — Router + Registry + MCP  ████████████████████  COMPLETE (v0.2.0)
+Phase 3: V2 — Router + Registry + MCP  ████████████████████  COMPLETE (v0.2.1)
 Phase 4: Parallel Execution (asyncio)   ░░░░░░░░░░░░░░░░░░░░  ROADMAP  (v0.3.0)
 ```
 

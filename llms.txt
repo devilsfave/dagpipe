@@ -60,7 +60,7 @@ nodes = [
 ]
 registry = {"research": research, "draft": draft}
 
-orch = PipelineOrchestrator(nodes=nodes, node_registry=registry, router=router)
+orch = PipelineOrchestrator(nodes=nodes, node_registry=registry, router=router, verbose=True)
 state, run = orch.run(initial_state={"topic": "AI Agents"})
 print(state["draft"]["article"])
 print(f"Cost: ${run.estimated_total_cost_usd:.4f}")
