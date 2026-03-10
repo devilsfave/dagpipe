@@ -286,3 +286,102 @@ def test_packager_zip_contents_unchanged() -> None:
     assert "pipeline.yaml" in names
     assert "runner.py" in names
     assert "README.md" in names
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Fix 1: model=None mandatory signature
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_runner_writer_prompt_requires_model_none_signature() -> None:
+    """runner_writer system prompt MUST mandate model=None in every function signature.
+
+    DagPipe calls: fn(context, model=...). Any function missing model=None
+    crashes immediately with 'got an unexpected keyword argument model'.
+    """
+    prompt = _get_runner_writer_prompt()
+    assert "model=None" in prompt, (
+        "runner_writer system prompt must explicitly require 'model=None' in "
+        "every node function signature. Without this, generated functions crash "
+        "immediately when DagPipe calls fn(context, model=...)."
+    )
+
+
+def test_runner_writer_prompt_model_none_is_prominent() -> None:
+    """model=None rule must appear early/prominently — not buried at the end."""
+    prompt = _get_runner_writer_prompt()
+    # Find position of model=None vs total length; must appear in first 40%
+    idx = prompt.find("model=None")
+    assert idx != -1, "model=None not found in prompt"
+    assert idx < len(prompt) * 0.4, (
+        f"model=None appears too late in the prompt (position {idx} of {len(prompt)}). "
+        "It must be a prominent, early rule so the LLM doesn't miss it."
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Fix 2: DEPENDENCY_NODE_ID context key instruction
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_runner_writer_prompt_requires_dependency_node_id_key() -> None:
+    """runner_writer prompt must instruct LLM to use actual upstream node ID as context key.
+
+    Generated code must NOT use invented keys like 'previous_node'. It must
+    use the actual upstream node ID from the pipeline YAML.
+    """
+    prompt = _get_runner_writer_prompt()
+    assert "DEPENDENCY_NODE_ID" in prompt, (
+        "runner_writer system prompt must contain 'DEPENDENCY_NODE_ID' as a "
+        "placeholder in the pattern that shows context.get() calls in save nodes. "
+        "Without this, the LLM invents context keys that do not match the actual "
+        "upstream node IDs, causing silent empty-output bugs."
+    )
+
+
+def test_runner_writer_prompt_forbids_invented_context_keys() -> None:
+    """runner_writer prompt must NOT teach 'prev_node' or 'upstream' as context keys."""
+    prompt = _get_runner_writer_prompt()
+    assert "previous_" + "node" not in prompt, (
+        "Prompt must not use an invented context key example — "
+        "it breaks the exact node ID rule."
+    )
+    assert "'upstream'" not in prompt, (
+        "Prompt must not use 'upstream' as a context key example."
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Fix 4: Multi-format save node patterns
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_runner_writer_prompt_contains_csv_pattern() -> None:
+    """runner_writer prompt must include a CSV save node pattern."""
+    prompt = _get_runner_writer_prompt()
+    assert "csv" in prompt.lower(), (
+        "runner_writer system prompt must show a CSV save node pattern so the LLM "
+        "can generate correct code for pipelines that save to .csv files."
+    )
+
+
+def test_runner_writer_prompt_contains_xml_pattern() -> None:
+    """runner_writer prompt must include an XML save node pattern."""
+    prompt = _get_runner_writer_prompt()
+    assert "xml" in prompt.lower(), (
+        "runner_writer system prompt must show an XML save node pattern."
+    )
+
+
+def test_runner_writer_prompt_contains_html_pattern() -> None:
+    """runner_writer prompt must include an HTML save node pattern."""
+    prompt = _get_runner_writer_prompt()
+    assert "html" in prompt.lower(), (
+        "runner_writer system prompt must show an HTML save node pattern."
+    )
+
+
+def test_runner_writer_prompt_contains_md_pattern() -> None:
+    """runner_writer prompt must include a Markdown save node pattern."""
+    prompt = _get_runner_writer_prompt()
+    # 'md' alone is too short and might appear in other words; check for 'output.md' or '.md'
+    assert ".md" in prompt or "markdown" in prompt.lower(), (
+        "runner_writer system prompt must show a Markdown (.md) save node pattern."
+    )

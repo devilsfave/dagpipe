@@ -8,7 +8,7 @@
         "zipUrl": {
             "type": "string",
             "title": "Pipeline ZIP File",
-            "format": "uri"
+            "template": "{{zipUrl}}"
         }
     }
 }
