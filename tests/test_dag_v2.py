@@ -1,4 +1,4 @@
-"""Tests for DagPipe v0.2.0 — All new V2 features.
+"""Tests for DagPipe v0.2.1 — All new V2 features.
 
 Run alongside existing tests:
     pytest tests/                    # runs both v0.1.x and v0.2.0 tests

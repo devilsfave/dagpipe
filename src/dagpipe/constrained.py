@@ -1,4 +1,4 @@
-"""DagPipe v0.2.0 — Constrained Generation
+"""DagPipe v0.2.1 — Constrained Generation
 
 DROP-IN REPLACEMENT for v0.1.x constrained.py.
 All v0.1.x calls work identically.

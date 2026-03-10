@@ -1,4 +1,4 @@
-"""DagPipe v0.2.0 — DAG Pipeline Orchestrator
+"""DagPipe v0.2.1 — DAG Pipeline Orchestrator
 
 DROP-IN REPLACEMENT for v0.1.x dag.py.
 Every v0.1.x call works identically. All new features are opt-in via
