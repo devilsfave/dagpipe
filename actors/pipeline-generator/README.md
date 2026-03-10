@@ -14,6 +14,19 @@ Building multi-step LLM workflows that involve crawling, scraping, summarizing, 
 
 This actor takes your plain-English goal and generates a complete, ready-to-run Python script (`runner.py`) using the DagPipe library.
 
+## 📄 Smart Per-Pipeline Documentation
+
+Every pipeline you generate ships with a README written specifically for that pipeline — not a generic template. It includes:
+
+- Plain-English walkthrough of every stage in your specific pipeline
+- Step-by-step setup instructions for complete beginners (get API key, install Python, extract files, set environment variables)
+- Platform-specific terminal commands for Windows, Mac, and Linux
+- Exact output files and state keys your pipeline produces
+- What to do if a specific node crashes
+- Customization suggestions based on your actual pipeline structure
+
+A developer gets technical precision. A non-developer gets a guide they can actually follow.
+
 ## 💡 How It Works
 
 1.  **Provide a Description**: Tell the actor what you want your pipeline to do. (e.g., *"Read a tech blog post, extract key points into a JSON schema, use an LLM to translate it to Spanish, and then save it to disk."*)

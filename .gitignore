@@ -92,3 +92,7 @@ router_test_out.txt
 security_fail.log
 tmp_*.py
 check_staleness_out.txt
+e2e_extracted/
+output.json
+output.txt
+
