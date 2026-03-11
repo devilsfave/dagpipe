@@ -19,7 +19,7 @@
   <a href="https://www.bestpractices.dev/projects/12089"><img src="https://www.bestpractices.dev/projects/12089/badge" alt="OpenSSF Best Practices" /></a>
 </p>
 
-### The reliability layer that makes AI workflows safe to ship: crash recovery, schema validation, and cost routing — in 150 lines of Python.
+### The reliability layer that makes AI workflows safe to ship: crash recovery, schema validation, and cost routing 
 
 </div>
 
