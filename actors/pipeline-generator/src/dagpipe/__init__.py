@@ -9,5 +9,10 @@ from .dag import (
     reset_circuit,
     inspect_failure,
 )
+from .registry import (
+    ModelRegistry,
+    ModelRetiredError,
+    ModelRetiredWarning,
+)
 
-__all__ = ["CheckpointStorage", "FilesystemCheckpoint", "PipelineRun", "NodeResult", "override_node", "reset_circuit", "inspect_failure"]
+__all__ = ["CheckpointStorage", "FilesystemCheckpoint", "PipelineRun", "NodeResult", "override_node", "reset_circuit", "inspect_failure", "ModelRegistry", "ModelRetiredError", "ModelRetiredWarning"]

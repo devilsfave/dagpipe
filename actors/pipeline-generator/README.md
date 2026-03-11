@@ -12,6 +12,16 @@ Building multi-step LLM workflows that involve crawling, scraping, summarizing, 
 4.  **Semantic Assertions**: Guaranteed quality with `assert_fn` support for robust output validation.
 5.  **Enhanced Telemetry**: Full `PipelineRun` metrics including token counts and estimated cost.
 
+### 🆕 Industrial-Grade Security & Resiliency
+
+For power users and production environments, the generator now supports:
+
+- **Context Isolation**: Every node runs in its own "sandbox." A researcher node cannot accidentally leak your database or API secrets from other branches.
+- **Manual Override System**: If an AI node gets stuck or keeps hallucinating, you can inject a manual output via a `.json` file to bypass the failure and resume the rest of the pipeline.
+- **Circuit Breakers**: Prevents cost spirals by automatically halting if a specific node fails repeatedly across multiple attempts.
+- **Industrial Formats**: Native support for generating **CSV, XML, HTML, and Markdown** save nodes out of the box.
+- **Source Staleness Protection**: Automatically detects if you've modified a node's code and warns you before re-using old checkpoints.
+
 This actor takes your plain-English goal and generates a complete, ready-to-run Python script (`runner.py`) using the DagPipe library.
 
 ## 📄 Smart Per-Pipeline Documentation
