@@ -45,7 +45,12 @@ def generate_pipeline(description: str) -> dict:
     if not api_key:
         return {"status": "error", "message": "GROQ_API_KEY missing."}
     
-    model = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+    model = os.environ.get("GROQ_MODEL")
+    if not model:
+        from dagpipe.registry import ModelRegistry
+        model_reg = ModelRegistry(groq_api_key=api_key)
+        # Use the exact same string from registry.py _FALLBACK_MODELS
+        model = model_reg.validate_model("llama-3.3-70b-versatile", provider="groq")
     
     try:
         client = Groq(api_key=api_key)

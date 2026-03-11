@@ -28,11 +28,18 @@ def main():
             raise ValueError("Missing 'groq_api_key'")
             
         os.environ['GROQ_API_KEY'] = api_key
+        
+        # Resolve model name once at startup
+        from dagpipe.registry import ModelRegistry
+        model_reg = ModelRegistry(groq_api_key=api_key)
+        # Use the exact same string from registry.py _FALLBACK_MODELS
+        resolved_model = model_reg.validate_model("llama-3.3-70b-versatile", provider="groq")
+        
         client = Groq(api_key=api_key)
         
         def call_groq(messages):
             resp = client.chat.completions.create(
-                model='llama-3.3-70b-versatile',
+                model=resolved_model,
                 messages=messages,
                 max_tokens=3000,
                 temperature=0,

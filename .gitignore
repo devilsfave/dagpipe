@@ -96,3 +96,7 @@ e2e_extracted/
 output.json
 output.txt
 
+
+dagpipe_core-*/
+test_extracted/
+e2e_extracted/

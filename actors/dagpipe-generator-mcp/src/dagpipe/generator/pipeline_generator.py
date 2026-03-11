@@ -93,12 +93,24 @@ def schema_designer(context: dict[str, Any], model: Any = None) -> dict[str, Any
             "content": (
                 "You are a DAG architect. Design a pipeline DAG from the "
                 "given steps. Each node needs: id (snake_case), fn_name "
-                "(same as id), depends_on (list of upstream node IDs), "
-                "complexity (0.0-1.0 where higher = harder), description, "
-                "and is_deterministic (true only for final packaging steps "
-                "that need no LLM). The last node should typically be "
+                "id (snake_case), fn_name (same as id), depends_on (list of "
+                "upstream node IDs), complexity (0.0-1.0 where higher = "
+                "harder), description, and is_deterministic (true only "
+                "for final packaging steps that need no LLM). "
+                "Additionally, provide assert_logic (a Python lambda string "
+                "to validate the node's output) and assert_message for "
+                "critical nodes. The last node should typically be "
                 "deterministic. Chain nodes linearly unless parallel "
-                "execution makes sense."
+                "execution makes sense.\n\n"
+                "RETURN KEY CONTRACTS — assert_logic MUST use these exact keys "
+                "(they match what runner.py actually returns):\n"
+                "  LLM / process node:  lambda out: bool(out.get('output'))\n"
+                "  Save / write node:   lambda out: out.get('file_saved') is True\n"
+                "  Load / read node:    lambda out: bool(out.get('loaded_data'))\n"
+                "  Fetch / HTTP node:   lambda out: bool(out.get('fetched_data'))\n"
+                "  Transform node:      lambda out: bool(out.get('transformed'))\n"
+                "  Status / done node:  lambda out: out.get('status') == 'complete'\n"
+                "Use ONLY these keys in assert_logic. Do NOT invent other key names."
             ),
         },
         {
@@ -145,6 +157,8 @@ def yaml_writer(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
             "complexity": node.get("complexity", 0.5),
             "is_deterministic": node.get("is_deterministic", False),
             "description": node.get("description", ""),
+            "assert_logic": node.get("assert_logic"),
+            "assert_message": node.get("assert_message"),
         }
         yaml_nodes.append(yaml_node)
 
@@ -185,6 +199,14 @@ def runner_writer(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     Uses the LLM to write real prompts tailored to each node's purpose.
     Post-processes to strip any markdown code fences from LLM output.
     """
+    from dagpipe.registry import ModelRegistry
+    import os
+
+    # Resolve dynamic model names for the prompt (internal use only)
+    model_reg = ModelRegistry(groq_api_key=os.environ.get("GROQ_API_KEY"))
+    _low_model = model_reg.validate_model("llama-3.1-8b-instant", provider="groq")
+    _high_model = model_reg.validate_model("llama-3.3-70b-versatile", provider="groq")
+
     design = context.get("schema_designer", {})
     yaml_out = context.get("yaml_writer", {})
     nodes = design.get("nodes", [])
@@ -205,50 +227,119 @@ def runner_writer(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
                 "You are a Python code generator for DagPipe pipelines. "
                 "Write a COMPLETE, RUNNABLE Python script. "
                 "Output ONLY raw Python — NO markdown, NO code fences, NO backticks.\n\n"
-                "You MUST follow this EXACT pattern for Groq and DagPipe usage:\n\n"
-                "--- EXACT IMPORTS ---\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "RULE 1 — MANDATORY FUNCTION SIGNATURE (MOST CRITICAL)\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "EVERY node function — input nodes, LLM nodes, save nodes, ALL of them —\n"
+                "MUST be defined with this EXACT signature:\n\n"
+                "    def node_name(context: dict, model=None) -> dict:\n\n"
+                "DagPipe calls every node as fn(context, model=...). A function defined\n"
+                "as def foo(context): crashes immediately with 'unexpected keyword argument model'.\n"
+                "Inside the function, if it is an LLM node, you MUST call the model like this:\n"
+                "    result = model(messages)  # model() is the callable wrapper passed by DagPipe\n\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "RULE 2 — CONTEXT KEYS MUST MATCH THE UPSTREAM NODE ID\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "When a node reads from an earlier node, use the EXACT predecessor node ID\n"
+                "from the pipeline YAML as the context key. NEVER use invented, generic names\n"
+                "such as 'parent', or any placeholder — use the real node ID.\n\n"
+                "Example: if node 'save_to_json' depends on 'write_summary', it MUST read:\n"
+                "    data = str(context.get('write_summary', {}).get('output') or '')\n\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "RULE 3 — RETURN KEY CONTRACTS (follow exactly)\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "Every node type has a FIXED return key. Use these EXACTLY. Do NOT invent new keys.\n"
+                "  LLM / process node:  return {'output': result}\n"
+                "  Save / write node:   return {'file_saved': True}\n"
+                "  Load / read node:    return {'loaded_data': data}\n"
+                "  Fetch / HTTP node:   return {'fetched_data': data}\n"
+                "  Transform node:      return {'transformed': data}\n"
+                "  Status / done node:  return {'status': 'complete'}\n\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "RULE 4 — SAVE NODE PATTERNS (all output formats)\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "Always cast output to str and guard against None with 'or \"\"':\n"
+                "    data = str(context.get('DEPENDENCY_NODE_ID', {}).get('output') or '')\n\n"
+                f"JSON save node:\n"
+                f"def save_to_json(context: dict, model=None) -> dict:\n"
+                f"    import json\n"
+                f"    data = str(context.get('DEPENDENCY_NODE_ID', {{}}).get('output') or '')\n"
+                f"    Path('output.json').write_text(json.dumps({{'result': data}}), encoding='utf-8')\n"
+                f"    return {{'file_saved': True}}\n\n"
+                "TXT save node:\n"
+                "def save_to_txt(context: dict, model=None) -> dict:\n"
+                "    data = str(context.get('DEPENDENCY_NODE_ID', {}).get('output') or '')\n"
+                "    Path('output.txt').write_text(data, encoding='utf-8')\n"
+                "    return {'file_saved': True}\n\n"
+                "CSV save node:\n"
+                "def save_to_csv(context: dict, model=None) -> dict:\n"
+                "    import csv\n"
+                "    data = str(context.get('DEPENDENCY_NODE_ID', {}).get('output') or '')\n"
+                "    with open('output.csv', 'w', newline='', encoding='utf-8') as f:\n"
+                "        writer = csv.writer(f)\n"
+                "        writer.writerow(['output'])\n"
+                "        writer.writerow([data])\n"
+                "    return {'file_saved': True}\n\n"
+                "XML save node:\n"
+                "def save_to_xml(context: dict, model=None) -> dict:\n"
+                "    import xml.etree.ElementTree as ET\n"
+                "    data = str(context.get('DEPENDENCY_NODE_ID', {}).get('output') or '')\n"
+                "    root = ET.Element('output')\n"
+                "    root.text = data\n"
+                "    ET.ElementTree(root).write('output.xml', encoding='unicode')\n"
+                "    return {'file_saved': True}\n\n"
+                "HTML save node:\n"
+                "def save_to_html(context: dict, model=None) -> dict:\n"
+                "    data = str(context.get('DEPENDENCY_NODE_ID', {}).get('output') or '')\n"
+                "    Path('output.html').write_text(f'<html><body>{data}</body></html>', encoding='utf-8')\n"
+                "    return {'file_saved': True}\n\n"
+                "MD save node:\n"
+                "def save_to_md(context: dict, model=None) -> dict:\n"
+                "    data = str(context.get('DEPENDENCY_NODE_ID', {}).get('output') or '')\n"
+                "    Path('output.md').write_text(data, encoding='utf-8')\n"
+                "    return {'file_saved': True}\n\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "EXACT IMPORTS\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                 "import os\n"
                 "from pathlib import Path\n"
                 "from groq import Groq\n"
-                "from dagpipe.dag import PipelineOrchestrator\n"
+                "from dagpipe.dag import PipelineOrchestrator, DAGNode\n"
                 "from dagpipe.router import ModelRouter\n\n"
-                "--- EXACT GROQ CLIENT ---\n"
-                "client = Groq(api_key=os.environ['GROQ_API_KEY'])\n\n"
-                "--- EXACT LLM WRAPPER FUNCTIONS ---\n"
-                "def call_groq_8b(messages: list) -> str:\n"
-                "    resp = client.chat.completions.create(\n"
-                "        model='llama-3.1-8b-instant',\n"
-                "        messages=messages,\n"
-                "        max_tokens=2048,\n"
-                "    )\n"
-                "    return resp.choices[0].message.content\n\n"
-                "def call_groq_70b(messages: list) -> str:\n"
-                "    resp = client.chat.completions.create(\n"
-                "        model='llama-3.1-70b-versatile',\n"
-                "        messages=messages,\n"
-                "        max_tokens=2048,\n"
-                "    )\n"
-                "    return resp.choices[0].message.content\n\n"
-                "--- EXACT NODE FUNCTION SIGNATURE ---\n"
-                "def my_node(context: dict, model=None) -> dict:\n"
-                "    result = model([{'role': 'user', 'content': 'your prompt'}]) if model else 'no model'\n"
-                "    return {'output': result}  # return ONLY this node's outputs\n\n"
-                "--- EXACT MODEL ROUTER ---\n"
+                "EXACT GROQ CLIENT\n"
+                "client = Groq(api_key=os.environ.get('GROQ_API_KEY'))\n\n"
+                "EXACT LLM WRAPPER FUNCTIONS\n"
+                f"def call_groq_8b(messages: list) -> str:\n"
+                f"    resp = client.chat.completions.create(\n"
+                f"        model='{_low_model}',\n"
+                f"        messages=messages,\n"
+                f"        max_tokens=2048,\n"
+                f"    )\n"
+                f"    return resp.choices[0].message.content\n\n"
+                f"def call_groq_70b(messages: list) -> str:\n"
+                f"    resp = client.chat.completions.create(\n"
+                f"        model='{_high_model}',\n"
+                f"        messages=messages,\n"
+                f"        max_tokens=2048,\n"
+                f"    )\n"
+                f"    return resp.choices[0].message.content\n\n"
+                "EXACT ORCHESTRATOR\n"
                 "router = ModelRouter(\n"
                 "    low_complexity_fn=call_groq_8b,\n"
                 "    high_complexity_fn=call_groq_70b,\n"
                 "    fallback_fn=call_groq_8b,\n"
-                "    low_label='groq-8b',\n"
-                "    high_label='groq-70b',\n"
-                "    fallback_label='groq-8b-fallback',\n"
-                ")\n\n"
-                "--- EXACT ORCHESTRATOR ---\n"
+                f"    low_label='{_low_model}',\n"
+                f"    high_label='{_high_model}',\n"
+                f"    fallback_label='{_low_model}',\n"
+                "    rpm_limit=30,\n"
+                ")\n"
                 "orch = PipelineOrchestrator(\n"
                 "    nodes=Path(__file__).parent / 'pipeline.yaml',\n"
-                "    node_registry=registry,\n"
+                "    node_registry=registry,  # 'registry' dict mapped to your functions\n"
                 "    router=router,\n"
+                "    verbose=True,\n"
                 ")\n"
-                "result = orch.run(initial_state={'input': 'your input here'})\n\n"
+                "state, run = orch.run(initial_state={'input': '...'})  # returns (state, run)\n\n"
                 "Use these patterns EXACTLY. Do not invent alternative APIs."
             ),
         },
@@ -305,17 +396,20 @@ def _fallback_runner(nodes: list[dict[str, Any]], use_case: str) -> str:
         f'import os, sys\n'
         f'from pathlib import Path\n'
         f'from groq import Groq\n'
-        f'from dagpipe.dag import PipelineOrchestrator\n'
+        f'from dagpipe.dag import PipelineOrchestrator, load_dag\n'
         f'from dagpipe.router import ModelRouter\n\n'
         f'{func_block}\n\n'
         f'def main():\n'
         f'    registry = {{{registry_items}}}\n'
+        f'    # V2 load_dag expects a Path\n'
+        f'    nodes = load_dag(Path(__file__).parent / "pipeline.yaml")\n'
         f'    orch = PipelineOrchestrator(\n'
-        f'        nodes=Path(__file__).parent / "pipeline.yaml",\n'
+        f'        nodes=nodes,\n'
         f'        node_registry=registry,\n'
         f'    )\n'
-        f'    result = orch.run()\n'
-        f'    print(result)\n\n'
+        f'    state, run = orch.run()\n'
+        f'    print(f"Status: {{run.status}}")\n'
+        f'    print(f"Cost: ${{run.estimated_total_cost_usd:.4f}}")\n\n'
         f'if __name__ == "__main__":\n'
         f'    main()\n'
     )
@@ -325,31 +419,414 @@ def _fallback_runner(nodes: list[dict[str, Any]], use_case: str) -> str:
 # NODE 5: packager
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _detect_models(script_content: str) -> dict[str, list[str]]:
+    """Detect which LLM providers and model names are referenced in runner.py.
+
+    Returns a dict with keys 'groq' and 'gemini', each a list of model
+    name strings found in the script.
+    """
+    import re
+    groq_models = re.findall(r'model=["\']([^"\']*(llama|mixtral|gemma|whisper)[^"\']*)["\']', script_content, re.IGNORECASE)
+    gemini_models = re.findall(r'model=["\']([^"\']*(gemini)[^"\']*)["\']', script_content, re.IGNORECASE)
+    return {
+        "groq": list(dict.fromkeys(m[0] for m in groq_models)),
+        "gemini": list(dict.fromkeys(m[0] for m in gemini_models)),
+    }
+
+
+def _detect_pip_packages(script_content: str) -> list[str]:
+    """Parse top-level imports from runner.py and map to pip packages."""
+    import re
+    # Always include dagpipe-core
+    packages = ["dagpipe-core"]
+    import_map = {
+        "groq": "groq",
+        "google.generativeai": "google-generativeai",
+        "google.genai": "google-generativeai",
+        "anthropic": "anthropic",
+        "openai": "openai",
+        "requests": "requests",
+        "httpx": "httpx",
+        "bs4": "beautifulsoup4",
+        "pandas": "pandas",
+        "numpy": "numpy",
+    }
+    for module, pkg in import_map.items():
+        if re.search(rf"^import {re.escape(module)}|^from {re.escape(module)}", script_content, re.MULTILINE):
+            if pkg not in packages:
+                packages.append(pkg)
+    return packages
+
+
+def _detect_save_files(script_content: str) -> list[str]:
+    """Detect output file paths written to disk in runner.py."""
+    import re
+    found = []
+    # write_text("path") or open("path", "w")
+    for m in re.findall(r'Path\([\'"](.*?)[\'"]\)\.write_text', script_content):
+        found.append(m)
+    for m in re.findall(r'open\([\'"](.*?)[\'"].*?,.*?[\'"]w', script_content):
+        found.append(m)
+    return list(dict.fromkeys(found))
+
+
+def _detect_initial_state_keys(script_content: str) -> dict[str, str]:
+    """Extract initial_state keys and example values from runner.py."""
+    import re
+    # Find orch.run(initial_state={...})
+    m = re.search(r'initial_state\s*=\s*\{([^}]+)\}', script_content)
+    if not m:
+        return {"input": "your input here"}
+    pairs = {}
+    for kv in re.findall(r'[\'"](\w+)[\'"]\s*:\s*[\'"](.*?)[\'"]', m.group(1)):
+        pairs[kv[0]] = kv[1]
+    return pairs or {"input": "your input here"}
+
+
+def _title_from_use_case(use_case: str) -> str:
+    """Convert use_case to a title-cased pipeline name."""
+    # Capitalise each word, strip trailing punctuation
+    return use_case.strip().rstrip(".").title()
+
+
+def _slugify_use_case(use_case: str, max_words: int = 5) -> str:
+    """Slugify a use_case string into a safe filename component."""
+    import re
+    words = use_case.strip().split()[:max_words]
+    slug = "_".join(re.sub(r"[^a-z0-9]", "", w.lower()) for w in words)
+    return slug or "pipeline"
+
+
+def _generate_readme(
+    use_case: str,
+    script_content: str,
+    yaml_content: str,
+    nodes_design: list[dict],
+) -> str:
+    """Generate a fully dynamic, per-pipeline README.
+
+    Reads the finalized runner.py and pipeline.yaml to produce a README
+    specific to this pipeline — not a generic template.
+
+    Sections:
+      1. Title + one-liner
+      2. What this pipeline does (plain English)
+      3. Before you start: API key + Python + install
+      4. Setup: extract and prepare
+      5. Set your API key
+      6. Run your pipeline
+      7. Your output
+      8. If something goes wrong
+      9. Customizing this pipeline
+     10. Built with DagPipe
+    """
+    import re
+    import yaml as _yaml
+
+    # ── Parse pipeline.yaml for node IDs ──────────────────────────────────────
+    try:
+        loaded_yaml = _yaml.safe_load(yaml_content) or {}
+        yaml_nodes = loaded_yaml.get("nodes", [])
+        node_ids = [n.get("id", "unknown") for n in yaml_nodes]
+    except Exception:
+        yaml_nodes = []
+        node_ids = [n.get("id", "unknown") for n in nodes_design]
+
+    # ── Detect models / providers ─────────────────────────────────────────────
+    models = _detect_models(script_content)
+    uses_groq = bool(models["groq"])
+    uses_gemini = bool(models["gemini"])
+    # Fallback: if neither detected, assume Groq (it's always in the template)
+    if not uses_groq and not uses_gemini:
+        uses_groq = "groq" in script_content.lower()
+
+    # ── Detect pip packages ───────────────────────────────────────────────────
+    packages = _detect_pip_packages(script_content)
+    pip_install_cmd = "pip install " + " ".join(packages)
+
+    # ── Detect output files ───────────────────────────────────────────────────
+    save_files = _detect_save_files(script_content)
+
+    # ── Detect initial_state keys ─────────────────────────────────────────────
+    init_keys = _detect_initial_state_keys(script_content)
+
+    # ── Derive title ──────────────────────────────────────────────────────────
+    title = _title_from_use_case(use_case)
+
+    # ── Build plain-English node walkthrough ──────────────────────────────────
+    def _node_sentence(node: dict, idx: int, total: int) -> str:
+        nid = node.get("id", "unknown")
+        desc = node.get("description") or nid.replace("_", " ")
+        det = node.get("is_deterministic", False)
+        prefix = "First" if idx == 0 else ("Finally" if idx == total - 1 else "Then")
+        if any(k in nid for k in ("save", "write", "export", "output")):
+            return f"{prefix}, it saves the result to disk ({desc})."
+        elif any(k in nid for k in ("fetch", "load", "read", "scrape", "collect")):
+            return f"{prefix}, it fetches or loads data ({desc})."
+        elif det:
+            return f"{prefix}, it packages and finalizes everything ({desc})."
+        else:
+            return f"{prefix}, it runs the '{nid.replace('_', ' ')}' step: {desc}."
+
+    walkthrough_sentences = [
+        _node_sentence(n, i, len(yaml_nodes)) for i, n in enumerate(yaml_nodes)
+    ] if yaml_nodes else [f"The pipeline executes {len(nodes_design)} steps to {use_case.lower()}. "]
+    walkthrough = " ".join(walkthrough_sentences)
+
+    # ── API key section ───────────────────────────────────────────────────────
+    api_key_sections = []
+    if uses_groq:
+        api_key_sections.append(
+            "**Get your free Groq API key:**\n\n"
+            "1. Go to https://console.groq.com\n"
+            "2. Sign up for a free account (no credit card required)\n"
+            "3. Click **API Keys** in the left sidebar\n"
+            "4. Click **Create API Key**\n"
+            "5. Copy the key — it starts with `gsk_`\n"
+            "6. Keep it somewhere safe. You will need it in the next step."
+        )
+    if uses_gemini:
+        api_key_sections.append(
+            "**Get your free Google AI Studio API key:**\n\n"
+            "1. Go to https://aistudio.google.com/app/apikey\n"
+            "2. Sign in with your Google account\n"
+            "3. Click **Create API key**\n"
+            "4. Copy the key\n"
+            "5. Keep it somewhere safe. You will need it in the next step."
+        )
+    api_key_content = "\n\n".join(api_key_sections) if api_key_sections else (
+        "This pipeline requires at least one LLM API key. "
+        "See the model imports in `runner.py` for details."
+    )
+
+    # ── Set API key section ───────────────────────────────────────────────────
+    env_vars = []
+    if uses_groq:
+        env_vars.append(("GROQ_API_KEY", "your-groq-key-here"))
+    if uses_gemini:
+        env_vars.append(("GOOGLE_API_KEY", "your-gemini-key-here"))
+    if not env_vars:
+        env_vars.append(("GROQ_API_KEY", "your-key-here"))
+
+    set_env_blocks = []
+    for var, placeholder in env_vars:
+        set_env_blocks.append(
+            f"**{var}**\n\n"
+            f"Windows PowerShell:\n"
+            f"```powershell\n$env:{var}=\"{placeholder}\"\n```\n\n"
+            f"Windows Command Prompt:\n"
+            f"```cmd\nset {var}={placeholder}\n```\n\n"
+            f"Mac/Linux:\n"
+            f"```bash\nexport {var}=\"{placeholder}\"\n```\n"
+            f"\n> Replace `{placeholder}` with your actual key from the step above.  \n"
+            f"> Note: This only lasts for the current terminal session."
+        )
+    set_env_section = "\n\n---\n\n".join(set_env_blocks)
+
+    # ── Run section: expected output per node ─────────────────────────────────
+    slug = _slugify_use_case(use_case)
+    node_output_lines = [f"[DagPipe] Starting pipeline: {slug}"]
+    for nid in node_ids:
+        node_output_lines.append(f"[DagPipe] Node '{nid}' -> running...")
+        node_output_lines.append(f"[DagPipe] Node '{nid}' -> complete (checkpointed)")
+    node_output_lines.append("[DagPipe] Pipeline complete.")
+    expected_output = "\n".join(node_output_lines)
+
+    # ── Output section ────────────────────────────────────────────────────────
+    if save_files:
+        output_lines = ["When the pipeline finishes successfully, you will find:"]
+        for f in save_files:
+            ext = f.rsplit(".", 1)[-1].upper() if "." in f else "file"
+            output_lines.append(f"- `{f}` — the output in {ext} format")
+        output_lines.append("- `.dagpipe/checkpoints/` — automatic recovery files (do not delete these)")
+        output_section = "\n".join(output_lines)
+    else:
+        state_keys = list(init_keys.keys())
+        output_section = (
+            "When the pipeline finishes, the final state dictionary contains results from all nodes.\n"
+            "Print or inspect specific keys from the `state` variable in `runner.py` to access results.\n\n"
+            "Checkpoint files are written to `.dagpipe/checkpoints/` after each successful node "
+            "(do not delete these — they enable crash recovery)."
+        )
+
+    # ── Troubleshooting: node-specific dead letter paths ─────────────────────
+    dead_letter_lines = []
+    for nid in node_ids:
+        dead_letter_lines.append(f"  .dagpipe/checkpoints/{nid}.failed.json")
+    dead_letter_str = "\n".join(dead_letter_lines) if dead_letter_lines else "  .dagpipe/checkpoints/[node-name].failed.json"
+
+    # ── Customization suggestions ──────────────────────────────────────────────
+    custom_tips = []
+    # Detect initial_state customization
+    if init_keys:
+        first_key, first_val = next(iter(init_keys.items()))
+        custom_tips.append(
+            f"To change the input, open `runner.py` and find the line near the bottom that "
+            f"says `initial_state={{'{first_key}': '{first_val}'}}`. "
+            f"Replace `{first_val!r}` with any value you want."
+        )
+    # Detect save nodes for file rename suggestion
+    if save_files:
+        f0 = save_files[0]
+        custom_tips.append(
+            f"To change the output filename, find `Path('{f0}')` in `runner.py` and update the path "
+            f"to wherever you want the file saved."
+        )
+    # Generic: add a node
+    if len(node_ids) >= 2:
+        last_node = node_ids[-1] if not any(k in node_ids[-1] for k in ("save","write")) else node_ids[-2]
+        custom_tips.append(
+            f"To add a new processing step, add a new node entry in `pipeline.yaml` after `{last_node}`, "
+            f"then implement the matching function in `runner.py` and add it to the `registry` dict."
+        )
+    if not custom_tips:
+        custom_tips.append("Open `runner.py` to adjust prompts, node logic, or output format to fit your needs.")
+
+    customization_section = "\n\n".join(f"{i+1}. {tip}" for i, tip in enumerate(custom_tips[:3]))
+
+    # ── Assemble the README ───────────────────────────────────────────────────
+    readme = f"""# {title}
+
+{use_case.strip().rstrip('.')}.
+
+---
+
+## What this pipeline does
+
+{walkthrough}
+
+---
+
+## Before you start: what you need
+
+### A. Get your API key
+
+{api_key_content}
+
+### B. Install Python (if not already installed)
+
+```
+Check if you have Python: open a terminal and run: python --version
+If you see Python 3.12 or higher, you're ready.
+If not, go to https://python.org/downloads and install Python 3.12 or higher.
+```
+
+### C. Install DagPipe and dependencies
+
+```bash
+{pip_install_cmd}
+```
+
+---
+
+## Setup: extract and prepare your pipeline
+
+1. Extract the ZIP file to wherever you keep your projects
+   - **Windows:** right-click the ZIP > "Extract All" > choose a location
+   - **Mac:** double-click the ZIP
+   - **Linux:** `unzip {slug}_pipeline.zip -d {slug}`
+2. Open a terminal in that folder:
+   - **Windows:** open File Explorer, click the address bar, type `powershell`, press Enter
+   - **Mac:** right-click the folder > "New Terminal at Folder"
+   - **Linux:** `cd {slug}`
+
+---
+
+## Set your API key
+
+{set_env_section}
+
+---
+
+## Run your pipeline
+
+```bash
+python runner.py
+```
+
+You will see output like this:
+
+```
+{expected_output}
+```
+
+---
+
+## Your output
+
+{output_section}
+
+---
+
+## If something goes wrong
+
+**If the pipeline crashes mid-run:**
+
+Don't worry — your progress is saved. Fix the problem and run `python runner.py` again.
+DagPipe will automatically resume from the last successful step.
+
+**Common errors:**
+
+- **API key error** (`AuthenticationError` or `401`): your key is wrong or not set. Re-run the
+  "Set your API key" step above, then run the pipeline again.
+- **Rate limit error** (`RateLimitError` or `429`): you've hit the free-tier limit.
+  Wait 60 seconds, then run `python runner.py` again — DagPipe resumes from where it stopped.
+- **Module not found** (`ModuleNotFoundError`): run the install command from Section 3 again.
+
+**If a node fails after 3 retries, DagPipe saves the failure details to:**
+
+```
+{dead_letter_str}
+```
+
+Open that file to see exactly what failed. Fix the issue and run `python runner.py` — it retries only the failed node.
+
+---
+
+## Customizing this pipeline
+
+{customization_section}
+
+---
+
+## Built with DagPipe
+
+This pipeline was generated by the DagPipe Pipeline Generator.
+
+- **DagPipe library:** https://github.com/devilsfave/dagpipe
+- **Pipeline Generator (Apify):** https://apify.com/gastronomic_desk/pipeline-generator
+- **MCP Server (use in your IDE):** https://smithery.ai/server/gastronomic-desk/dagpipe-generator
+
+```bash
+pip install dagpipe-core
+```
+"""
+    return readme
+
+
 def packager(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     """Package generated files into a zip archive.
 
     Deterministic — no LLM call. Writes YAML, runner script, and a
-    README to a temp directory, then zips them.
+    dynamically generated README to a temp directory, then zips them.
     """
     yaml_out = context.get("yaml_writer", {})
     runner_out = context.get("runner_writer", {})
     intake = context.get("intake_parser", {})
+    design = context.get("schema_designer", {})
     use_case = intake.get("use_case", "generated_pipeline")
 
     yaml_content = yaml_out.get("yaml_content", "")
     script_content = runner_out.get("script_content", "")
     dependencies = runner_out.get("dependencies", [])
+    nodes_design = design.get("nodes", [])
 
-    # Build a simple README
-    deps_str = " ".join(dependencies)
-    readme = (
-        f"# {use_case}\n\n"
-        f"Generated by DagPipe Template Generator.\n\n"
-        f"## Setup\n"
-        f"```bash\npip install {deps_str}\n"
-        f"export GROQ_API_KEY='gsk_...'\n```\n\n"
-        f"## Run\n"
-        f"```bash\npython runner.py\n```\n"
+    # Generate a dynamic, per-pipeline README from the finalized code
+    readme = _generate_readme(
+        use_case=use_case,
+        script_content=script_content,
+        yaml_content=yaml_content,
+        nodes_design=nodes_design,
     )
 
     # Write to a temp directory and zip — never hardcode paths
@@ -358,8 +835,10 @@ def packager(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     (tmp_dir / "runner.py").write_text(script_content, encoding="utf-8")
     (tmp_dir / "README.md").write_text(readme, encoding="utf-8")
 
-    # Create zip in the same temp directory
-    zip_path = tmp_dir / "pipeline.zip"
+    # Create zip with a slugified name derived from the pipeline use_case
+    slug = _slugify_use_case(use_case)
+    zip_filename = f"{slug}_pipeline.zip"
+    zip_path = tmp_dir / zip_filename
     files_to_zip = ["pipeline.yaml", "runner.py", "README.md"]
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for fname in files_to_zip:
@@ -368,6 +847,7 @@ def packager(context: dict[str, Any], model: Any = None) -> dict[str, Any]:
     return {
         "zip_path": str(zip_path),
         "files_included": files_to_zip,
+        "zip_filename": zip_filename,
     }
 
 
