@@ -1,102 +1,127 @@
-# Commercial Assets (Do NOT push to GitHub)
-product_cover.png
-store_logo.png
-*.zip
+# WHITELIST — only explicitly allowed files can be committed
+# Everything else is blocked by default
+*
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-.venv/
-venv/
-ENV/
+# Core project
+!.gitignore
+!LICENSE
+!README.md
+!pyproject.toml
+!MIGRATION.md
+!llms.txt
+!smithery.yaml
+!glama.json
+!server.json
 
-# Pytest
-.pytest_cache/
-htmlcov/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
+# Folders
+!src/
+src/**
+!src/dagpipe/
+src/dagpipe/**
+!src/dagpipe/*.py
+!src/dagpipe/generator/
+src/dagpipe/generator/**
+!src/dagpipe/generator/*.py
 
-# DagPipe
-.dagpipe/checkpoints/
-legacy/
-AGENTS.md
-BLUEPRINT.md
-HANDOFF.md
-PROJECT_STATUS.md
-AGENT_PRIMER.md
-LATEST_V2_FILES/
-src/dagpipe/_v1_backup/
+!actors/
+actors/**
+!actors/pipeline-generator/
+!actors/pipeline-generator/src/
+!actors/pipeline-generator/src/*.py
+!actors/pipeline-generator/src/dagpipe/
+!actors/pipeline-generator/src/dagpipe/*.py
+!actors/pipeline-generator/src/dagpipe/generator/
+!actors/pipeline-generator/src/dagpipe/generator/*.py
+!actors/pipeline-generator/*.json
+!actors/pipeline-generator/*.toml
+!actors/pipeline-generator/Dockerfile
+!actors/pipeline-generator/README.md
+!actors/pipeline-generator/.actor/
+!actors/pipeline-generator/.actor/*
+!actors/pipeline-generator/tsconfig.json
+!actors/pipeline-generator/package.json
+!actors/pipeline-generator/package-lock.json
+!actors/pipeline-generator/tests/
+!actors/pipeline-generator/tests/*
+!actors/pipeline-generator/src/main.ts
 
-# Internal session / AI council documents (never push to public repo)
-DISCUSSION.md
-SESSION_1_PROMPTS.md
-CONVERGENCE_CONTEXT.md
-COUNCIL_LOG.md
-HANDOFF.md
-INTELLIGENCE_BRIEF.md
-DagPipe_Session1_Summary.md
-V2_INTEGRATION_REPORT.md
-router_test_out.txt
-tmp_*.py
-check_staleness_out.txt
+!actors/dagpipe-generator-mcp/
+!actors/dagpipe-generator-mcp/src/
+!actors/dagpipe-generator-mcp/src/*.py
+!actors/dagpipe-generator-mcp/src/dagpipe/
+!actors/dagpipe-generator-mcp/src/dagpipe/*.py
+!actors/dagpipe-generator-mcp/src/dagpipe/generator/
+!actors/dagpipe-generator-mcp/src/dagpipe/generator/*.py
+!actors/dagpipe-generator-mcp/.actor/
+!actors/dagpipe-generator-mcp/.actor/*
+!actors/dagpipe-generator-mcp/Dockerfile
+!actors/dagpipe-generator-mcp/requirements.txt
 
-# Development
-.vscode/
-.idea/
-outputs/
-*.swp
-*.swo
+!actors/structured-extract/
+actors/structured-extract/**
+!actors/structured-extract/src/
+!actors/structured-extract/src/*
+!actors/structured-extract/.actor/
+!actors/structured-extract/.actor/*
+!actors/structured-extract/Dockerfile
+!actors/structured-extract/README.md
+!actors/structured-extract/package.json
+!actors/structured-extract/package-lock.json
+!actors/structured-extract/tsconfig.json
+!actors/structured-extract/eslint.config.mjs
+!actors/structured-extract/.editorconfig
+!actors/structured-extract/.prettierrc
+!actors/structured-extract/.prettierignore
+!actors/structured-extract/.dockerignore
+!actors/structured-extract/.gitignore
 
-# OS
-Thumbs.db
-Desktop.ini
-.DS_Store
-old session/
+!actors/ecommerce-price-extractor/
+actors/ecommerce-price-extractor/**
+!actors/ecommerce-price-extractor/src/
+!actors/ecommerce-price-extractor/src/*
+!actors/ecommerce-price-extractor/.actor/
+!actors/ecommerce-price-extractor/.actor/*
+!actors/ecommerce-price-extractor/Dockerfile
+!actors/ecommerce-price-extractor/README.md
+!actors/ecommerce-price-extractor/package.json
+!actors/ecommerce-price-extractor/package-lock.json
+!actors/ecommerce-price-extractor/tsconfig.json
+!actors/ecommerce-price-extractor/eslint.config.mjs
+!actors/ecommerce-price-extractor/.editorconfig
+!actors/ecommerce-price-extractor/.prettierrc
+!actors/ecommerce-price-extractor/.prettierignore
+!actors/ecommerce-price-extractor/.dockerignore
+!actors/ecommerce-price-extractor/.gitignore
 
-# Node & Apify
-node_modules/
-dist/
-build/
-.actor/storage/
-actor/storage/
-storage/
+!tests/
+tests/**
+!tests/*.py
+!tests/*.yaml
+!tests/*.json
 
-DIAGNOSTIC_REPORT.md
-PROJECT_STATUS.md
-V2_INTEGRATION_REPORT.md
-router_test_out.txt
-security_fail.log
-tmp_*.py
-check_staleness_out.txt
-e2e_extracted/
-output.json
-output.txt
+!scripts/
+scripts/**
+!scripts/*.py
 
+!templates/
+templates/**
+!templates/*
 
-dagpipe_core-*/
-test_extracted/
-e2e_extracted/
+!assets/
+assets/**
+!assets/*
+
+!.github/
+.github/**
+!.github/workflows/
+!.github/workflows/*
+!.github/dependabot.yml
+
+!docs/
+docs/**
+!docs/*
+
+!servers/
+servers/**
+!servers/dagpipe-generator/
+!servers/dagpipe-generator/*.py
