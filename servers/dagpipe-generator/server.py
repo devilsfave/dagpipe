@@ -50,5 +50,7 @@ if __name__ == "__main__":
     mcp.run(
         transport="streamable-http",
         stateless_http=True,
-        json_response=True
+        json_response=True,
+        host="0.0.0.0",
+        port=8000
     )
