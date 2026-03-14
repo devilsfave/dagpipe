@@ -1,7 +1,8 @@
 {
     "name": "DagPipe Pipeline Generator",
-    "description": "Generate crash-proof Python LLM pipelines from plain English. Outputs production-ready ZIP with crash recovery, schema validation, and intelligent cost routing.",
+    "description": "Generates crash-proof Python LLM pipelines from plain English descriptions. Pipelines resume from the last successful node after a crash instead of restarting from scratch. Provider-agnostic — works with Groq, Gemini, Ollama, OpenAI, or any Python callable. Zero infrastructure, runs entirely on free-tier APIs.",
     "license": "MIT",
+    "githubUsername": "devilsfave",
     "categories": [
         "code-generation",
         "ai",
@@ -9,6 +10,7 @@
         "llm"
     ],
     "links": {
+        "github": "https://github.com/devilsfave/dagpipe",
         "apify": "https://apify.com/gastronomic_desk/pipeline-generator",
         "smithery": "https://smithery.ai/server/dagpipe-generator"
     }
