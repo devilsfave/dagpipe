@@ -601,6 +601,7 @@ state, run = orch.run(initial_state={"input": "your data"})
 - `dagpipe.registry` — validates model availability at startup, warns on retired models
 
 **MCP Server:** https://smithery.ai/servers/gastronomic-desk/dagpipe-generator
+**Glama MCP Server:** https://glama.ai/mcp/servers/devilsfave/dagpipe
 **Pipeline Generator (Apify):** https://apify.com/gastronomic_desk/pipeline-generator
 
 </details>
