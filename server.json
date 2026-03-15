@@ -1,7 +1,7 @@
 {
     "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
     "name": "io.github.devilsfave/dagpipe",
-    "description": "LLM pipeline crash recovery. Resumes from last successful node instead of restarting from scratch. No database required.",
+    "description": "Crash-proof LLM pipelines. Resumes from failure without a database.",
     "repository": {
         "url": "https://github.com/devilsfave/dagpipe",
         "source": "github"
