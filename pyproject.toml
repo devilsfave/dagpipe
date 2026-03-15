@@ -4,12 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dagpipe-core"
-version = "0.2.2"
-mcp-name = "io.github.devilsfave/dagpipe"
+version = "0.2.3"
 description = "LLM pipeline crash recovery for Python. Resumes from last successful node instead of restarting from scratch. No database required, just plain JSON files."
 readme = "README.md"
 requires-python = ">=3.12"
-license = "MIT"
+license = { text = "MIT" }
 authors = [{ name = "Herbert" }]
 keywords = ["llm", "ai", "genai", "pipeline", "dag", "orchestrator", "orchestration", "free-tier", "zero-cost", "checkpointing", "crash-recovery", "resilience", "structured-output", "constrained-generation", "pydantic", "json-schema", "function-calling", "tool-use", "agents", "ai-agents", "agentic-workflows", "workflow-engine", "langchain-alternative", "openai-alternative", "groq", "gemini", "task-dependency", "graph-orchestration", "retry-logic", "llm-pipeline"]
 classifiers = [
@@ -38,6 +37,9 @@ Documentation = "https://github.com/devilsfave/dagpipe#readme"
 Repository = "https://github.com/devilsfave/dagpipe"
 Issues = "https://github.com/devilsfave/dagpipe/issues"
 Changelog = "https://github.com/devilsfave/dagpipe/releases"
+
+[tool.mcp]
+mcp-name = "io.github.devilsfave/dagpipe"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

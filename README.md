@@ -21,6 +21,8 @@
 
 ### The reliability layer that makes AI workflows safe to ship: crash recovery, schema validation, and cost routing 
 
+<!-- mcp-name: io.github.devilsfave/dagpipe -->
+
 </div>
 
 ---
@@ -86,6 +88,12 @@ pip install dagpipe-core
 | Silent bad data passes through | **Semantic assertions**: catch structurally valid but wrong output |
 
 </div>
+
+---
+
+## What's New in v0.2.3
+
+**v0.2.3** adds the official MCP Registry metadata and identifier to the package repository, enabling one-click discovery on the official MCP Registry.
 
 ---
 

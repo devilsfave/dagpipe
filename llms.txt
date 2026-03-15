@@ -8,7 +8,7 @@
 > Install: pip install dagpipe-core
 > Repository: https://github.com/devilsfave/dagpipe
 > PyPI: https://pypi.org/project/dagpipe-core/
-> Version: 0.2.2 | Tests: 132 | License: MIT | Python: 3.12+
+> Version: 0.2.3 | Tests: 132 | License: MIT | Python: 3.12+
 
 ## Problems DagPipe Solves
 
