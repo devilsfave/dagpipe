@@ -1,6 +1,6 @@
 {
     "name": "dagpipe-generator",
-    "version": "0.1.0",
+    "version": "0.2.2",
     "description": "Generate crash-proof Python LLM pipelines from plain English descriptions. Outputs deployable ZIP with crash recovery, schema validation, and cost routing via DagPipe.",
     "author": "Herbert Yeboah",
     "license": "MIT",
