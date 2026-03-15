@@ -1,34 +1,20 @@
 {
-    "name": "dagpipe-generator",
-    "version": "0.2.2",
-    "description": "Generate crash-proof Python LLM pipelines from plain English descriptions. Outputs deployable ZIP with crash recovery, schema validation, and cost routing via DagPipe.",
-    "author": "Herbert Yeboah",
-    "license": "MIT",
-    "homepage": "https://github.com/devilsfave/dagpipe",
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name": "io.github.devilsfave/dagpipe",
+    "description": "LLM pipeline crash recovery. Resumes from last successful node instead of restarting from scratch. No database required.",
     "repository": {
-        "type": "git",
-        "url": "https://github.com/devilsfave/dagpipe"
+        "url": "https://github.com/devilsfave/dagpipe",
+        "source": "github"
     },
-    "tags": [
-        "llm",
-        "pipeline",
-        "python",
-        "ai",
-        "workflow",
-        "groq",
-        "code-generation",
-        "automation"
-    ],
-    "tools": [
+    "version": "0.2.2",
+    "packages": [
         {
-            "name": "generate_pipeline",
-            "description": "Generate a complete crash-proof DagPipe Python workflow from a plain English description. Returns a downloadable ZIP."
-        }
-    ],
-    "transport": [
-        {
-            "type": "streamable-http",
-            "url": "https://gastronomic_desk--dagpipe-generator-mcp.apify.actor/mcp"
+            "registryType": "pypi",
+            "identifier": "dagpipe-core",
+            "version": "0.2.2",
+            "transport": {
+                "type": "stdio"
+            }
         }
     ]
 }
