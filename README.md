@@ -262,7 +262,7 @@ Your Tasks (YAML or Python list of DAGNodes)
 
 ## 📦 Core Modules
 
-### `dagpipe.dag` — The Orchestrator
+### `dagpipe.dag`: The Orchestrator
 The central engine. Loads a DAG from a Python list or YAML file, sorts nodes by dependency, and executes them with checkpointing and retry.
 
 ```python
@@ -275,10 +275,10 @@ nodes = load_dag(Path("my_pipeline.yaml"))
 nodes = [DAGNode(id="step_a", fn_name="fn_a", complexity=0.3)]
 ```
 
-### `dagpipe.checkpoints` — Crash Recovery
+### `dagpipe.checkpoints`: Crash Recovery
 Saves node output to disk after every successful execution. On resume, completed nodes are skipped entirely.
 
-> **New in v0.2.0:** the `CheckpointStorage` Protocol — swap the default filesystem backend for Redis, S3, or any custom store:
+> **New in v0.2.0:** the `CheckpointStorage` Protocol, allowing you to swap the default filesystem backend for Redis, S3, or any custom store:
 
 ```python
 from dagpipe.dag import CheckpointStorage
@@ -292,7 +292,7 @@ class RedisCheckpoint(CheckpointStorage):
 
 *(Note: passing `checkpoint_dir` directly to the Orchestrator is deprecated in v0.2.0. Use `checkpoint_backend=FilesystemCheckpoint(path)` instead.)*
 
-### `dagpipe.router` — Intelligent Model Selection
+### `dagpipe.router`: Intelligent Model Selection
 Routes tasks to the cheapest model that can handle them. Tracks rate limit budgets and escalates on retry.
 
 ```python
@@ -309,7 +309,7 @@ router = ModelRouter(
 fn, label = router.route(complexity=0.8)
 ```
 
-### `dagpipe.constrained` — Guaranteed Structured Output
+### `dagpipe.constrained`: Guaranteed Structured Output
 Wraps any LLM call with Pydantic schema validation. On failure, injects the error back into the prompt and retries automatically.
 
 ```python
@@ -330,7 +330,7 @@ result = constrained_generate(
 # result is a validated ArticleOutput instance, every time
 ```
 
-### `dagpipe.registry` — Live Model Registry *(New in v0.2.0)*
+### `dagpipe.registry`: Live Model Registry *(New in v0.2.0)*
 Self-maintaining database of model availability and pricing. Refreshes every 24 hours. If a model goes offline, the registry marks it unavailable automatically.
 
 ```python
@@ -485,7 +485,7 @@ More templates coming. Have a use case? [Open an issue.](https://github.com/devi
 ```
 Phase 1: Core Library + Checkpointing   ████████████████████  COMPLETE (v0.1.0)
 Phase 2: PyPI + Templates + Actors      ████████████████████  COMPLETE (v0.1.0)
-Phase 3: V2 — Router + Registry + MCP  ████████████████████  COMPLETE (v0.2.1)
+Phase 3: V2 - Router + Registry + MCP  ████████████████████  COMPLETE (v0.2.1)
 Phase 4: Parallel Execution (asyncio)   ░░░░░░░░░░░░░░░░░░░░  ROADMAP  (v0.3.0)
 ```
 
