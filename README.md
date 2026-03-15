@@ -499,7 +499,7 @@ More templates coming. Have a use case? [Open an issue.](https://github.com/devi
 ```
 Phase 1: Core Library + Checkpointing   ████████████████████  COMPLETE (v0.1.0)
 Phase 2: PyPI + Templates + Actors      ████████████████████  COMPLETE (v0.1.0)
-Phase 3: V2 - Router + Registry + MCP  ████████████████████  COMPLETE (v0.2.2)
+Phase 3: V2 - Router + Registry + MCP   ████████████████████  COMPLETE (v0.2.3)
 Phase 4: Parallel Execution (asyncio)   ░░░░░░░░░░░░░░░░░░░░  ROADMAP  (v0.3.0)
 ```
 
