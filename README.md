@@ -89,6 +89,12 @@ pip install dagpipe-core
 
 ---
 
+## What's New in v0.2.2
+
+**v0.2.2** improves PyPI discoverability with optimized metadata, a clearer project description, and enhanced AI agent categorization.
+
+---
+
 ## What's New in v0.2.1
 
 **v0.2.1** brings crucial generator reliability fixes and a highly requested DX feature:
