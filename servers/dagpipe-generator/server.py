@@ -26,7 +26,8 @@ def generate_pipeline(description: str) -> dict:
                 temperature=0,
             )
             return resp.choices[0].message.content
-        out_dir = Path.home() / "Desktop" / "DagPipe_Pipelines"
+        import tempfile
+        out_dir = Path(tempfile.gettempdir()) / "DagPipe_Pipelines"
         out_dir.mkdir(parents=True, exist_ok=True)
         clean_desc = "".join(
             c if c.isalnum() else "_" for c in description[:15]
