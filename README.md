@@ -27,11 +27,11 @@
 
 > NeurIPS 2025 research analyzing **1,642 real-world multi-agent execution traces**
 > found a **41–86.7% failure rate** across 7 state-of-the-art open-source systems.
-> The root cause: cascading error propagation — one failed node corrupts all downstream nodes.
+> The root cause: cascading error propagation, where one failed node corrupts all downstream nodes.
 >
 > **DagPipe makes cascade failure structurally impossible.**
 
-Every node's output is independently validated and checkpointed before the next node executes. A failure at node 4 cannot corrupt nodes 1, 2, or 3. Delete nothing. Just re-run. DagPipe resumes exactly where it stopped — automatically.
+Every node's output is independently validated and checkpointed before the next node executes. A failure at node 4 cannot corrupt nodes 1, 2, or 3. Delete nothing. Just re-run. DagPipe resumes exactly where it stopped, automatically.
 
 ```
 Pipeline: research → outline → draft → edit → publish
@@ -57,18 +57,18 @@ pip install dagpipe-core
 
 ## Three Ways to Use DagPipe
 
-**For developers** — install the library and build crash-proof LLM pipelines in Python:
+**For developers**: install the library and build crash-proof LLM pipelines in Python:
 ```bash
 pip install dagpipe-core
 ```
 
-**For non-coders** — describe your workflow in plain English, receive production-ready crash-proof pipeline code as a downloadable zip. No coding required:
+**For non-coders**: describe your workflow in plain English, receive production-ready crash-proof pipeline code as a downloadable zip. No coding required:
 [👉 Pipeline Generator on Apify ($0.05/run)](https://apify.com/gastronomic_desk/pipeline-generator)
 
-**For AI agents and IDE users** — connect directly via MCP. Use DagPipe from Claude Desktop, Cursor, Windsurf, or any MCP-compatible client without writing any code:
+**For AI agents and IDE users**: connect directly via MCP. Use DagPipe from Claude Desktop, Cursor, Windsurf, or any MCP-compatible client without writing any code:
 [👉 DagPipe Generator MCP on Smithery](https://smithery.ai/server/gastronomic-desk/dagpipe-generator)
 
-> The generator outputs DagPipe pipelines — every generated zip already has crash recovery, schema validation, and cost routing built in by default. No other LLM pipeline framework ships this.
+> The generator outputs DagPipe pipelines, as every generated zip already has crash recovery, schema validation, and cost routing built in by default. No other LLM pipeline framework ships this.
 
 ---
 
@@ -100,10 +100,10 @@ pip install dagpipe-core
 
 ## What's New in v0.2.0
 
-**v0.2.0** was a significant architectural upgrade. All features are opt-in and fully backwards compatible — existing v0.1.x pipelines run without changes.
+**v0.2.0** was a significant architectural upgrade. All features are opt-in and fully backwards compatible, meaning existing v0.1.x pipelines run without changes.
 
 ### Smart Model Router
-The router automatically selects which AI model to use based on task complexity. Simple tasks go to fast, free models. Hard tasks escalate to more capable models. If a model fails or rate-limits, it tries the next one — automatically.
+The router automatically selects which AI model to use based on task complexity. Simple tasks go to fast, free models. Hard tasks escalate to more capable models. If a model fails or rate-limits, it tries the next one, automatically.
 
 ```python
 router = ModelRouter(
@@ -115,7 +115,7 @@ router = ModelRouter(
 ```
 
 ### Live Model Registry
-A self-maintaining database of free-tier model availability and pricing. Refreshes every 24 hours automatically. If a model goes offline, the registry marks it unavailable and the router stops routing to it — without any manual intervention.
+A self-maintaining database of free-tier model availability and pricing. Refreshes every 24 hours automatically. If a model goes offline, the registry marks it unavailable and the router stops routing to it, without any manual intervention.
 
 ### Semantic Output Assertions
 Beyond schema validation, nodes can declare semantic rules. If the LLM returns structurally valid but logically wrong data, the assertion catches it and forces self-correction:
@@ -133,7 +133,7 @@ DAGNode(
 Nodes only receive outputs from their declared dependencies. A node processing untrusted web data cannot access credentials or outputs from unrelated pipeline branches.
 
 ### Dead Letter Queue
-When a node exhausts all retries, DagPipe saves the complete failure context to `.dagpipe/checkpoints/{node_id}.failed.json` — including what was passed in, what error occurred, and instructions for manual correction. No failure context is ever lost.
+When a node exhausts all retries, DagPipe saves the complete failure context to `.dagpipe/checkpoints/{node_id}.failed.json`, including what was passed in, what error occurred, and instructions for manual correction. No failure context is ever lost.
 
 ### Pluggable Checkpoint Backends
 Swap out filesystem storage for Redis, S3, or any custom backend by implementing the `CheckpointStorage` protocol.
@@ -378,7 +378,7 @@ DagPipe is designed to run entirely on free tiers:
 
 > ⚠️ Gemini 2.0 Flash was retired March 3, 2026. Update any old model references to `gemini-2.5-flash`.
 
-Wire any of these as your `low_complexity_fn`, `high_complexity_fn`, or `fallback_fn`. DagPipe is provider-agnostic — any Python callable works.
+Wire any of these as your `low_complexity_fn`, `high_complexity_fn`, or `fallback_fn`. DagPipe is provider-agnostic, and any Python callable works.
 
 ---
 
@@ -437,7 +437,7 @@ python servers/dagpipe-generator/server.py
 ## 🔒 Security Architecture
 
 ### Static Execution Graph
-DagPipe pipelines cannot self-modify. The graph is declared in YAML before runtime. No LLM call can add, remove, or reorder nodes. This makes DagPipe safe to run on sensitive data — unlike agent frameworks where the LLM decides what executes next.
+DagPipe pipelines cannot self-modify. The graph is declared in YAML before runtime. No LLM call can add, remove, or reorder nodes. This makes DagPipe safe to run on sensitive data, unlike agent frameworks where the LLM decides what executes next.
 
 ### Semantic Output Contracts *(v0.2.0+)*
 Beyond schema validation, nodes can declare semantic assertions. Structurally valid but logically wrong data is caught, injected back into the retry prompt, and forced to self-correct:
@@ -455,7 +455,7 @@ DAGNode(
 Nodes only receive outputs from their declared dependencies. A node processing untrusted web data cannot access API keys, credentials, or outputs from unrelated pipeline branches.
 
 ### Dead Letter Queue *(v0.2.0+)*
-When a node fails after all retries, DagPipe saves the full failure context to `.dagpipe/checkpoints/{node_id}.failed.json` — including the context passed in, the last error, and instructions for manual correction. No failure context is ever lost.
+When a node fails after all retries, DagPipe saves the full failure context to `.dagpipe/checkpoints/{node_id}.failed.json`, including the context passed in, the last error, and instructions for manual correction. No failure context is ever lost.
 
 ---
 
@@ -500,7 +500,7 @@ Phase 4: Parallel Execution (asyncio)   ░░░░░░░░░░░░░�
 
 **Why not just use LangChain or LangGraph?**
 
-LangGraph has checkpointing, but it is tightly coupled to their `TypedDict` state system and graph compilation model. You adopt the full framework to get it. DagPipe's checkpoints are plain JSON files on disk — readable with any text editor, no framework lock-in required. DagPipe also ships a built-in generator that produces entire crash-proof pipelines from a plain English description. LangGraph does not have this.
+LangGraph has checkpointing, but it is tightly coupled to their `TypedDict` state system and graph compilation model. You adopt the full framework to get it. DagPipe's checkpoints are plain JSON files on disk, readable with any text editor, and requiring no framework lock-in. DagPipe also ships a built-in generator that produces entire crash-proof pipelines from a plain English description. LangGraph does not have this.
 
 **Why not just wrap my pipeline in a try/except and restart manually?**
 
@@ -512,7 +512,7 @@ LangGraph's checkpointing requires a `StateGraph`, `TypedDict` schemas, and a co
 
 **Can I use this with OpenAI, Anthropic, or any other provider?**
 
-Yes. Any Python function that takes a list of messages and returns a string works as a model function. OpenAI, Anthropic, Cohere, a local Ollama call, or a mock function for testing — if it is callable, DagPipe can route to it.
+Yes. Any Python function that takes a list of messages and returns a string works as a model function. OpenAI, Anthropic, Cohere, a local Ollama call, or a mock function for testing: if it is callable, DagPipe can route to it.
 
 **Does DagPipe store my checkpoint data anywhere online?**
 
@@ -520,7 +520,7 @@ No. Checkpoints are plain JSON files written to a local directory on your machin
 
 **How does the router work without using an LLM?**
 
-Using an LLM to route an LLM is too expensive. The router uses pure Python heuristics — keyword matching and token count thresholds — to estimate cognitive complexity. If the task scores below your threshold, it routes to your `low_complexity_fn`. Above it, it routes to your `high_complexity_fn`.
+Using an LLM to route an LLM is too expensive. The router uses pure Python heuristics, such as keyword matching and token count thresholds, to estimate cognitive complexity. If the task scores below your threshold, it routes to your `low_complexity_fn`. Above it, it routes to your `high_complexity_fn`.
 
 **What happens if the schema validator keeps failing?**
 
@@ -595,10 +595,10 @@ state, run = orch.run(initial_state={"input": "your data"})
 ```
 
 **What each module does:**
-- `dagpipe.dag` — orchestrator, checkpointing, crash recovery, telemetry
-- `dagpipe.router` — routes tasks to cheapest capable model by complexity score
-- `dagpipe.constrained` — wraps LLM calls with Pydantic validation and auto-retry
-- `dagpipe.registry` — validates model availability at startup, warns on retired models
+- `dagpipe.dag`: orchestrator, checkpointing, crash recovery, telemetry
+- `dagpipe.router`: routes tasks to cheapest capable model by complexity score
+- `dagpipe.constrained`: wraps LLM calls with Pydantic validation and auto-retry
+- `dagpipe.registry`: validates model availability at startup, warns on retired models
 
 **MCP Server:** https://smithery.ai/servers/gastronomic-desk/dagpipe-generator
 
@@ -610,7 +610,7 @@ state, run = orch.run(initial_state={"input": "your data"})
 
 ## 📄 License
 
-MIT — built for the global developer community.
+MIT: built for the global developer community.
 
 ---
 
