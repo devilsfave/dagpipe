@@ -489,7 +489,7 @@ Phase 3: V2 - Router + Registry + MCP  █████████████�
 Phase 4: Parallel Execution (asyncio)   ░░░░░░░░░░░░░░░░░░░░  ROADMAP  (v0.3.0)
 ```
 
-**Test coverage:** 108 tests · 5 modules · 0 regressions · Python 3.12 + 3.13
+**Test coverage:** 132 tests · 5 modules · 0 regressions · Python 3.12 + 3.13
 
 ---
 
